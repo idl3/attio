@@ -116,5 +116,41 @@ module Attio
     def users
       @users ||= Resources::Users.new(self)
     end
+
+    # Access to the Notes API resource.
+    #
+    # @return [Resources::Notes] Notes resource instance
+    # @example
+    #   notes = client.notes.list(parent_object: 'people', parent_record_id: 'rec_123')
+    def notes
+      @notes ||= Resources::Notes.new(self)
+    end
+
+    # Access to the Tasks API resource.
+    #
+    # @return [Resources::Tasks] Tasks resource instance
+    # @example
+    #   tasks = client.tasks.list(status: 'pending')
+    def tasks
+      @tasks ||= Resources::Tasks.new(self)
+    end
+
+    # Access to the Comments API resource.
+    #
+    # @return [Resources::Comments] Comments resource instance
+    # @example
+    #   comments = client.comments.list(thread_id: 'thread_123')
+    def comments
+      @comments ||= Resources::Comments.new(self)
+    end
+
+    # Access to the Threads API resource.
+    #
+    # @return [Resources::Threads] Threads resource instance
+    # @example
+    #   threads = client.threads.list(parent_object: 'companies', parent_record_id: 'rec_456')
+    def threads
+      @threads ||= Resources::Threads.new(self)
+    end
   end
 end

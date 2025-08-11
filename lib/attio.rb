@@ -14,6 +14,10 @@ require "attio/resources/lists"
 require "attio/resources/workspaces"
 require "attio/resources/attributes"
 require "attio/resources/users"
+require "attio/resources/notes"
+require "attio/resources/tasks"
+require "attio/resources/comments"
+require "attio/resources/threads"
 
 # The main Attio module provides access to the Attio API client.
 #
