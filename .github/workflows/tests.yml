@@ -1,0 +1,61 @@
+name: Tests
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  rspec:
+    runs-on: ubuntu-latest
+    name: RSpec Tests
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.3'
+        bundler-cache: true
+    
+    - name: Run RSpec with Coverage
+      run: |
+        bundle exec rspec --format documentation --format json --out rspec-results.json
+      env:
+        COVERAGE: true
+    
+    - name: Parse Test Results
+      if: always()
+      run: |
+        if [ -f rspec-results.json ]; then
+          echo "## Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          TOTAL=$(jq '.summary.example_count' rspec-results.json)
+          PASSED=$(jq '.summary.example_count - .summary.failure_count' rspec-results.json)
+          FAILED=$(jq '.summary.failure_count' rspec-results.json)
+          DURATION=$(jq '.summary.duration' rspec-results.json)
+          
+          echo "✅ **Passed:** $PASSED/$TOTAL tests" >> $GITHUB_STEP_SUMMARY
+          if [ "$FAILED" -gt 0 ]; then
+            echo "❌ **Failed:** $FAILED tests" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "⏱️ **Duration:** ${DURATION}s" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -f coverage/.last_run.json ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "## Coverage Report" >> $GITHUB_STEP_SUMMARY
+            COVERAGE=$(jq '.result.line' coverage/.last_run.json)
+            echo "📊 **Line Coverage:** ${COVERAGE}%" >> $GITHUB_STEP_SUMMARY
+          fi
+        fi
+    
+    - name: Upload Test Results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: rspec-results
+        path: |
+          rspec-results.json
+          coverage/

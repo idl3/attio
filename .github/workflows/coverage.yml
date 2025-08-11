@@ -1,0 +1,61 @@
+name: Coverage
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.3'
+        bundler-cache: true
+    
+    - name: Run tests with coverage
+      run: |
+        bundle exec rspec
+      env:
+        COVERAGE: true
+    
+    - name: Generate coverage badge
+      run: |
+        if [ -f coverage/.last_run.json ]; then
+          COVERAGE=$(ruby -rjson -e "puts JSON.parse(File.read('coverage/.last_run.json'))['result']['line']")
+          echo "Coverage: ${COVERAGE}%"
+          
+          # Determine color based on coverage
+          if (( $(echo "$COVERAGE >= 90" | bc -l) )); then
+            COLOR="brightgreen"
+          elif (( $(echo "$COVERAGE >= 80" | bc -l) )); then
+            COLOR="green"
+          elif (( $(echo "$COVERAGE >= 70" | bc -l) )); then
+            COLOR="yellow"
+          elif (( $(echo "$COVERAGE >= 60" | bc -l) )); then
+            COLOR="orange"
+          else
+            COLOR="red"
+          fi
+          
+          # Create badge JSON
+          echo "{\"schemaVersion\": 1, \"label\": \"coverage\", \"message\": \"${COVERAGE}%\", \"color\": \"${COLOR}\"}" > coverage-badge.json
+          
+          # Also create a simple text file for reference
+          echo "${COVERAGE}" > coverage-percentage.txt
+        fi
+    
+    - name: Upload coverage artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: |
+          coverage/
+          coverage-badge.json
+          coverage-percentage.txt

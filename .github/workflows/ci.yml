@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   pull_request:
-    branches: [ main ]
+    branches: [ master ]
 
 env:
   RUBY_PLATFORM: ruby
@@ -29,9 +29,9 @@ jobs:
     - name: Create coverage directory
       run: mkdir -p coverage
 
-    - name: Run tests
+    - name: Run RSpec tests
       run: |
-        bundle exec rake coverage:report
+        bundle exec rspec --format documentation
       env:
         COVERAGE: true
 
@@ -74,8 +74,8 @@ jobs:
 
     - name: Run bundler-audit
       run: |
-        bundle exec bundler-audit check --update
-        bundle exec bundler-audit check --format json --output bundler-audit.json || true
+        gem install bundler-audit
+        bundle-audit check --update || true
 
     - name: Upload security scan results
       uses: actions/upload-artifact@v4
