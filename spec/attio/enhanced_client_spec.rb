@@ -267,6 +267,94 @@ RSpec.describe Attio::EnhancedClient do
     end
   end
 
+  describe "connection pool HTTP client creation" do
+    it "creates actual HttpClient instances in the pool" do
+      # Mock the HttpClient class
+      http_client_class = Class.new do
+        def initialize(base_url:, headers:, timeout:)
+          @base_url = base_url
+          @headers = headers
+          @timeout = timeout
+        end
+        
+        def get(path)
+          { "data" => [] }
+        end
+      end
+      stub_const("Attio::HttpClient", http_client_class)
+      
+      client = described_class.new(
+        api_key: api_key,
+        connection_pool: { size: 2, timeout: 1 }
+      )
+      
+      # Force pool creation by using the connection
+      pool = client.instance_variable_get(:@pool)
+      expect(pool).to be_a(Attio::ConnectionPool)
+    end
+  end
+
+  describe "circuit breaker state change callback" do
+    it "records state changes when instrumentation is present" do
+      instrumentation = instance_double(Attio::Observability::Instrumentation)
+      allow(instrumentation).to receive(:record_circuit_breaker)
+      
+      client = described_class.new(
+        api_key: api_key,
+        circuit_breaker: { threshold: 2, timeout: 1 }
+      )
+      client.instance_variable_set(:@instrumentation, instrumentation)
+      
+      breaker = client.instance_variable_get(:@circuit_breaker)
+      callback = breaker.instance_variable_get(:@on_state_change)
+      
+      expect(instrumentation).to receive(:record_circuit_breaker).with(
+        endpoint: "api",
+        old_state: :closed,
+        new_state: :open
+      )
+      callback.call(:closed, :open)
+    end
+  end
+
+  describe "#check_api_health (private)" do
+    let(:connection) { instance_double(Attio::HttpClient) }
+    
+    it "returns false when API call fails" do
+      client = described_class.new(api_key: api_key)
+      
+      allow(client).to receive(:connection).and_return(connection)
+      allow(connection).to receive(:get).with("meta/status").and_raise(StandardError)
+      
+      result = client.send(:check_api_health)
+      expect(result).to be false
+    end
+
+    it "returns true when API call succeeds" do
+      client = described_class.new(api_key: api_key)
+      
+      allow(client).to receive(:connection).and_return(connection)
+      allow(connection).to receive(:get).with("meta/status").and_return({ "status" => "ok" })
+      
+      result = client.send(:check_api_health)
+      expect(result).to be true
+    end
+  end
+
+  describe "#default_headers (private)" do
+    it "returns proper headers hash" do
+      client = described_class.new(api_key: api_key)
+      
+      headers = client.send(:default_headers)
+      expect(headers).to include(
+        "Authorization" => "Bearer #{api_key}",
+        "Accept" => "application/json",
+        "Content-Type" => "application/json"
+      )
+      expect(headers["User-Agent"]).to match(/Attio Ruby Client/)
+    end
+  end
+
   describe "#shutdown!" do
     let(:client) do
       described_class.new(

@@ -277,3 +277,197 @@ RSpec.describe Attio::Observability::Traces::Memory do
     end
   end
 end
+
+RSpec.describe "Attio::Observability factories" do
+  describe "Metrics.for" do
+    it "creates StatsD backend when gem is available" do
+      # Mock the gem
+      statsd_class = Class.new do
+        def initialize(host, port); end
+        def increment(metric, tags: nil); end
+        def gauge(metric, value, tags: nil); end
+        def histogram(metric, value, tags: nil); end
+      end
+      stub_const("::Statsd", statsd_class)
+      
+      backend = Attio::Observability::Metrics.for(:statsd)
+      expect(backend).to be_a(Attio::Observability::Metrics::StatsD)
+    end
+
+    it "creates Datadog backend when gem is available" do
+      # Mock the gem
+      datadog_module = Module.new
+      statsd_class = Class.new do
+        def initialize(host, port); end
+        def increment(metric, tags: nil); end
+        def gauge(metric, value, tags: nil); end
+        def histogram(metric, value, tags: nil); end
+      end
+      stub_const("::Datadog", datadog_module)
+      stub_const("::Datadog::Statsd", statsd_class)
+      
+      backend = Attio::Observability::Metrics.for(:datadog)
+      expect(backend).to be_a(Attio::Observability::Metrics::Datadog)
+    end
+
+    it "creates Prometheus backend when gem is available" do
+      # Mock the gem
+      prometheus_module = Module.new
+      client_module = Module.new
+      registry = Class.new do
+        def counter(name, docstring:, labels: []); double("counter", increment: nil); end
+        def gauge(name, docstring:, labels: []); double("gauge", set: nil); end
+        def histogram(name, docstring:, labels: []); double("histogram", observe: nil); end
+      end
+      stub_const("::Prometheus", prometheus_module)
+      stub_const("::Prometheus::Client", client_module)
+      allow(client_module).to receive(:registry).and_return(registry.new)
+      
+      backend = Attio::Observability::Metrics.for(:prometheus)
+      expect(backend).to be_a(Attio::Observability::Metrics::Prometheus)
+    end
+
+    it "creates Memory backend" do
+      backend = Attio::Observability::Metrics.for(:memory)
+      expect(backend).to be_a(Attio::Observability::Metrics::Memory)
+    end
+
+    it "raises for unknown backend" do
+      expect { Attio::Observability::Metrics.for(:unknown) }.to raise_error(ArgumentError, /Unknown metric backend/)
+    end
+  end
+
+  describe "Traces.for" do
+    it "creates OpenTelemetry backend when gem is available" do
+      # Mock the gem
+      opentelemetry_module = Module.new
+      tracer_provider = double("provider", tracer: double("tracer", in_span: nil))
+      stub_const("::OpenTelemetry", opentelemetry_module)
+      allow(opentelemetry_module).to receive(:tracer_provider).and_return(tracer_provider)
+      
+      backend = Attio::Observability::Traces.for(:opentelemetry)
+      expect(backend).to be_a(Attio::Observability::Traces::OpenTelemetry)
+    end
+
+    it "creates DatadogAPM backend when gem is available" do
+      # Mock the gem
+      datadog_module = Module.new
+      tracing_module = Module.new do
+        def self.trace(name)
+          yield(double("span")) if block_given?
+        end
+      end
+      stub_const("::Datadog", datadog_module)
+      stub_const("::Datadog::Tracing", tracing_module)
+      
+      backend = Attio::Observability::Traces.for(:datadog)
+      expect(backend).to be_a(Attio::Observability::Traces::DatadogAPM)
+    end
+
+    it "creates Memory backend" do
+      backend = Attio::Observability::Traces.for(:memory)
+      expect(backend).to be_a(Attio::Observability::Traces::Memory)
+    end
+
+    it "raises for unknown backend" do
+      expect { Attio::Observability::Traces.for(:unknown) }.to raise_error(ArgumentError, /Unknown trace backend/)
+    end
+  end
+end
+
+RSpec.describe "Attio::Observability backend implementations" do
+  describe "StatsD" do
+    before do
+      # Mock the gem being available
+      statsd_class = Class.new do
+        def initialize(host, port); end
+        def increment(metric, tags: nil); end
+        def gauge(metric, value, tags: nil); end
+        def histogram(metric, value, tags: nil); end
+      end
+      stub_const("::Statsd", statsd_class)
+    end
+
+    it "creates client and calls methods" do
+      backend = Attio::Observability::Metrics::StatsD.new
+      expect { backend.increment("test") }.not_to raise_error
+      expect { backend.gauge("test", 1) }.not_to raise_error
+      expect { backend.histogram("test", 1) }.not_to raise_error
+    end
+  end
+
+  describe "Datadog" do
+    before do
+      datadog_module = Module.new
+      statsd_class = Class.new do
+        def initialize(host, port); end
+        def increment(metric, tags: nil); end
+        def gauge(metric, value, tags: nil); end
+        def histogram(metric, value, tags: nil); end
+      end
+      stub_const("::Datadog", datadog_module)
+      stub_const("::Datadog::Statsd", statsd_class)
+    end
+
+    it "creates client and calls methods" do
+      backend = Attio::Observability::Metrics::Datadog.new
+      expect { backend.increment("test") }.not_to raise_error
+      expect { backend.gauge("test", 1) }.not_to raise_error
+      expect { backend.histogram("test", 1) }.not_to raise_error
+    end
+  end
+
+  describe "Prometheus" do
+    before do
+      prometheus_module = Module.new
+      client_module = Module.new
+      registry = Class.new do
+        def counter(name, docstring:, labels: []); double("counter", increment: nil); end
+        def gauge(name, docstring:, labels: []); double("gauge", set: nil); end
+        def histogram(name, docstring:, labels: []); double("histogram", observe: nil); end
+      end
+      stub_const("::Prometheus", prometheus_module)
+      stub_const("::Prometheus::Client", client_module)
+      allow(client_module).to receive(:registry).and_return(registry.new)
+    end
+
+    it "creates client and calls methods" do
+      backend = Attio::Observability::Metrics::Prometheus.new
+      expect { backend.increment("test") }.not_to raise_error
+      expect { backend.gauge("test", 1) }.not_to raise_error
+      expect { backend.histogram("test", 1) }.not_to raise_error
+    end
+  end
+
+  describe "OpenTelemetry" do
+    before do
+      opentelemetry_module = Module.new
+      tracer_provider = double("provider", tracer: double("tracer", in_span: nil))
+      stub_const("::OpenTelemetry", opentelemetry_module)
+      allow(opentelemetry_module).to receive(:tracer_provider).and_return(tracer_provider)
+    end
+
+    it "creates tracer and spans" do
+      backend = Attio::Observability::Traces::OpenTelemetry.new
+      expect { backend.span("test") { |span| span } }.not_to raise_error
+    end
+  end
+
+  describe "DatadogAPM" do
+    before do
+      datadog_module = Module.new
+      tracing_module = Module.new do
+        def self.trace(name)
+          yield(double("span")) if block_given?
+        end
+      end
+      stub_const("::Datadog", datadog_module)
+      stub_const("::Datadog::Tracing", tracing_module)
+    end
+
+    it "creates tracer and spans" do
+      backend = Attio::Observability::Traces::DatadogAPM.new
+      expect { backend.span("test") { |span| span } }.not_to raise_error
+    end
+  end
+end
