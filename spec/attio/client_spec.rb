@@ -133,5 +133,53 @@ RSpec.describe Attio::Client do
         expect(users1).to be(users2)
       end
     end
+
+    describe "#notes" do
+      it "returns a Notes resource" do
+        expect(client.notes).to be_a(Attio::Resources::Notes)
+      end
+
+      it "memoizes the resource" do
+        notes1 = client.notes
+        notes2 = client.notes
+        expect(notes1).to be(notes2)
+      end
+    end
+
+    describe "#tasks" do
+      it "returns a Tasks resource" do
+        expect(client.tasks).to be_a(Attio::Resources::Tasks)
+      end
+
+      it "memoizes the resource" do
+        tasks1 = client.tasks
+        tasks2 = client.tasks
+        expect(tasks1).to be(tasks2)
+      end
+    end
+
+    describe "#comments" do
+      it "returns a Comments resource" do
+        expect(client.comments).to be_a(Attio::Resources::Comments)
+      end
+
+      it "memoizes the resource" do
+        comments1 = client.comments
+        comments2 = client.comments
+        expect(comments1).to be(comments2)
+      end
+    end
+
+    describe "#threads" do
+      it "returns a Threads resource" do
+        expect(client.threads).to be_a(Attio::Resources::Threads)
+      end
+
+      it "memoizes the resource" do
+        threads1 = client.threads
+        threads2 = client.threads
+        expect(threads1).to be(threads2)
+      end
+    end
   end
 end
