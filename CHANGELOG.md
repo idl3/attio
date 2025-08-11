@@ -7,7 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.1.0] - 2025-08-11 - Initial Release
+## [0.1.1] - 2025-08-11
+
+### Changed
+- Updated gem description to remove "Official" designation
+
+## [0.1.0] - 2025-08-11 - Initial Release (yanked)
 
 ### Added
 - Initial implementation of Attio Ruby client
