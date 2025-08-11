@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2] - 2025-08-11
+
+### Added
+- Ruby 3.4 support in CI/CD pipelines
+- GitHub Actions badges for tests and coverage
+- Comprehensive documentation for all classes
+
+### Improved
+- Applied RuboCop with Stripe's best practices configuration
+- Refactored HttpClient#handle_response to reduce cyclomatic complexity
+- Fixed all code style violations (284 auto-corrected)
+- Enhanced CI/CD workflows with proper bundler configuration
+
+### Removed
+- Unnecessary test files (test_basic.rb, test_typhoeus.rb, run_tests.rb)
+- .rubocop_todo.yml (all violations fixed)
+
 ## [0.1.1] - 2025-08-11
 
 ### Changed

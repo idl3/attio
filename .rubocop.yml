@@ -1,5 +1,3 @@
-inherit_from: .rubocop_todo.yml
-
 AllCops:
   DisplayCopNames: true
   TargetRubyVersion: 3.0
@@ -141,7 +139,7 @@ Style/TrailingCommaInHashLiteral:
 Gemspec/DeprecatedAttributeAssignment: # new in 1.30
   Enabled: true
 Gemspec/DevelopmentDependencies: # new in 1.44
-  Enabled: false
+  Enabled: true
 Gemspec/RequireMFA: # new in 1.23
   Enabled: false
 Layout/LineContinuationLeadingSpace: # new in 1.31
