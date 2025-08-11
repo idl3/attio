@@ -4,7 +4,7 @@
 [![Test Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)](https://github.com/idl3/attio/tree/master/spec)
 [![Documentation](https://img.shields.io/badge/docs-yard-blue.svg)](https://idl3.github.io/attio)
 [![Gem Version](https://badge.fury.io/rb/attio.svg)](https://badge.fury.io/rb/attio)
-[![RSpec](https://img.shields.io/badge/RSpec-147_tests-green.svg)](https://github.com/idl3/attio/tree/master/spec)
+[![RSpec](https://img.shields.io/badge/RSpec-265_tests-green.svg)](https://github.com/idl3/attio/tree/master/spec)
 
 Ruby client for the [Attio CRM API](https://developers.attio.com/). This library provides easy access to the Attio API, allowing you to manage records, objects, lists, and more.
 
@@ -154,6 +154,156 @@ client.records.update(
 
 ### Working with Other Resources
 
+#### Comments
+
+```ruby
+# List comments on a record
+comments = client.comments.list(
+  parent_object: 'people',
+  parent_record_id: 'person-123'
+)
+
+# List comments in a thread
+thread_comments = client.comments.list(thread_id: 'thread-456')
+
+# Create a comment on a record
+comment = client.comments.create(
+  parent_object: 'people',
+  parent_record_id: 'person-123',
+  content: 'This is a comment with **markdown** support!'
+)
+
+# Create a comment in a thread
+thread_comment = client.comments.create(
+  thread_id: 'thread-456',
+  content: 'Following up on this discussion'
+)
+
+# Update a comment
+updated_comment = client.comments.update(
+  id: 'comment-123',
+  content: 'Updated comment content'
+)
+
+# React to a comment
+client.comments.react(id: 'comment-123', emoji: '👍')
+
+# Remove reaction
+client.comments.unreact(id: 'comment-123', emoji: '👍')
+
+# Delete a comment
+client.comments.delete(id: 'comment-123')
+```
+
+#### Threads
+
+```ruby
+# List threads on a record
+threads = client.threads.list(
+  parent_object: 'companies',
+  parent_record_id: 'company-123'
+)
+
+# Get a thread with comments
+thread = client.threads.get(id: 'thread-123', include_comments: true)
+
+# Create a thread
+thread = client.threads.create(
+  parent_object: 'companies',
+  parent_record_id: 'company-123',
+  title: 'Q4 Planning Discussion',
+  description: 'Thread for Q4 planning discussions',
+  participant_ids: ['user-1', 'user-2']
+)
+
+# Update thread title
+client.threads.update(id: 'thread-123', title: 'Updated Q4 Planning')
+
+# Manage participants
+client.threads.add_participants(id: 'thread-123', user_ids: ['user-3', 'user-4'])
+client.threads.remove_participants(id: 'thread-123', user_ids: ['user-2'])
+
+# Close and reopen threads
+client.threads.close(id: 'thread-123')
+client.threads.reopen(id: 'thread-123')
+
+# Delete a thread
+client.threads.delete(id: 'thread-123')
+```
+
+#### Tasks
+
+```ruby
+# List all tasks
+tasks = client.tasks.list
+
+# List tasks with filters
+my_tasks = client.tasks.list(
+  assignee_id: 'user-123',
+  status: 'pending'
+)
+
+# Get a specific task
+task = client.tasks.get(id: 'task-123')
+
+# Create a task
+task = client.tasks.create(
+  parent_object: 'people',
+  parent_record_id: 'person-123',
+  title: 'Follow up with customer',
+  due_date: '2025-02-01',
+  assignee_id: 'user-456'
+)
+
+# Update a task
+client.tasks.update(
+  id: 'task-123',
+  title: 'Updated task title',
+  status: 'in_progress'
+)
+
+# Complete a task
+client.tasks.complete(id: 'task-123', completed_at: Time.now.iso8601)
+
+# Reopen a task
+client.tasks.reopen(id: 'task-123')
+
+# Delete a task
+client.tasks.delete(id: 'task-123')
+```
+
+#### Notes
+
+```ruby
+# List notes on a record
+notes = client.notes.list(
+  parent_object: 'companies',
+  parent_record_id: 'company-123'
+)
+
+# Get a specific note
+note = client.notes.get(id: 'note-123')
+
+# Create a note
+note = client.notes.create(
+  parent_object: 'companies',
+  parent_record_id: 'company-123',
+  title: 'Meeting Notes - Q4 Planning',
+  content: 'Discussed roadmap and resource allocation...',
+  tags: ['important', 'quarterly-planning']
+)
+
+# Update a note
+client.notes.update(
+  id: 'note-123',
+  title: 'Updated Meeting Notes',
+  content: 'Added action items from discussion'
+)
+
+# Delete a note
+client.notes.delete(id: 'note-123')
+```
+
 #### Objects
 
 ```ruby
@@ -240,12 +390,16 @@ end
 
 This client supports all major Attio API endpoints:
 
-- ✅ Records (CRUD operations, querying)
+- ✅ Records (CRUD operations, querying with filters and sorting)
 - ✅ Objects (list, get schema)
-- ✅ Lists (list, get entries)
+- ✅ Lists (list, get entries, manage list entries)
 - ✅ Workspaces (list, get current)
 - ✅ Attributes (list, create, update)
 - ✅ Users (list, get current user)
+- ✅ Comments (CRUD operations, reactions on records and threads)
+- ✅ Threads (CRUD operations, participant management, status control)
+- ✅ Tasks (CRUD operations, assignment, completion tracking)
+- ✅ Notes (CRUD operations on records)
 
 ## Development
 

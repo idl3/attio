@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Comments resource with full CRUD operations and emoji reactions
+- Threads resource with participant management and status control
+- Tasks resource with assignment and completion tracking
+- Notes resource for creating and managing notes on records
+- DELETE with body support in HttpClient for participant management
+- URL encoding for emoji reactions using CGI.escape
+- Comprehensive examples for collaboration features
+- Advanced filtering and querying examples
+- Complete CRM workflow example
+
+### Improved
+- Achieved 100% test coverage (376/376 lines)
+- Increased test count from 147 to 265 tests
+- Refactored Base class to reduce code duplication across resources
+- Extracted common validation methods to base class
+- Standardized error messages across all resources
+- Fixed keyword arguments vs options hash issues in test mocks
+- Updated README with all new features and comprehensive examples
+
+### Fixed
+- Semantic correctness in all test files
+- REST convention compliance for DELETE operations
+- Proper URL encoding for special characters in API paths
+
 ## [0.1.3] - 2025-08-11
 
 ### Fixed
