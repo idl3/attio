@@ -17,46 +17,34 @@ module Attio
       end
 
       def get(id:)
-        validate_id!(id)
+        validate_id!(id, "List")
         request(:get, "lists/#{id}")
       end
 
       def entries(id:, **params)
-        validate_id!(id)
+        validate_id!(id, "List")
         request(:get, "lists/#{id}/entries", params)
       end
 
       def create_entry(id:, data:)
-        validate_id!(id)
-        validate_data!(data)
+        validate_id!(id, "List")
+        validate_list_entry_data!(data)
         request(:post, "lists/#{id}/entries", data)
       end
 
       def get_entry(list_id:, entry_id:)
-        validate_list_id!(list_id)
-        validate_entry_id!(entry_id)
+        validate_id!(list_id, "List")
+        validate_id!(entry_id, "Entry")
         request(:get, "lists/#{list_id}/entries/#{entry_id}")
       end
 
       def delete_entry(list_id:, entry_id:)
-        validate_list_id!(list_id)
-        validate_entry_id!(entry_id)
+        validate_id!(list_id, "List")
+        validate_id!(entry_id, "Entry")
         request(:delete, "lists/#{list_id}/entries/#{entry_id}")
       end
 
-      private def validate_id!(id)
-        raise ArgumentError, "List ID is required" if id.nil? || id.to_s.strip.empty?
-      end
-
-      private def validate_list_id!(list_id)
-        raise ArgumentError, "List ID is required" if list_id.nil? || list_id.to_s.strip.empty?
-      end
-
-      private def validate_entry_id!(entry_id)
-        raise ArgumentError, "Entry ID is required" if entry_id.nil? || entry_id.to_s.strip.empty?
-      end
-
-      private def validate_data!(data)
+      private def validate_list_entry_data!(data)
         raise ArgumentError, "Data is required" if data.nil?
         raise ArgumentError, "Data must be a hash" unless data.is_a?(Hash)
       end

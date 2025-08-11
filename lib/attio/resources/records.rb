@@ -45,7 +45,7 @@ module Attio
       #     limit: 50
       #   )
       def list(object:, **params)
-        validate_object!(object)
+        validate_required_string!(object, "Object type")
         request(:post, "objects/#{object}/records/query", params)
       end
 
@@ -60,8 +60,8 @@ module Attio
       # @example
       #   record = client.records.get(object: 'people', id: 'abc123')
       def get(object:, id:)
-        validate_object!(object)
-        validate_id!(id)
+        validate_required_string!(object, "Object type")
+        validate_id!(id, "Record")
         request(:get, "objects/#{object}/records/#{id}")
       end
 
@@ -83,8 +83,8 @@ module Attio
       #     }
       #   )
       def create(object:, data:)
-        validate_object!(object)
-        validate_data!(data)
+        validate_required_string!(object, "Object type")
+        validate_record_data!(data)
         request(:post, "objects/#{object}/records", data)
       end
 
@@ -104,9 +104,9 @@ module Attio
       #     data: { name: 'Jane Smith' }
       #   )
       def update(object:, id:, data:)
-        validate_object!(object)
-        validate_id!(id)
-        validate_data!(data)
+        validate_required_string!(object, "Object type")
+        validate_id!(id, "Record")
+        validate_record_data!(data)
         request(:patch, "objects/#{object}/records/#{id}", data)
       end
 
@@ -121,22 +121,9 @@ module Attio
       # @example
       #   client.records.delete(object: 'people', id: 'abc123')
       def delete(object:, id:)
-        validate_object!(object)
-        validate_id!(id)
+        validate_required_string!(object, "Object type")
+        validate_id!(id, "Record")
         request(:delete, "objects/#{object}/records/#{id}")
-      end
-
-      private def validate_object!(object)
-        raise ArgumentError, "Object type is required" if object.nil? || object.to_s.strip.empty?
-      end
-
-      # Validates that the ID parameter is present and not empty.
-      #
-      # @param id [String, nil] The record ID to validate
-      # @raise [ArgumentError] if id is nil or empty
-      # @api private
-      private def validate_id!(id)
-        raise ArgumentError, "Record ID is required" if id.nil? || id.to_s.strip.empty?
       end
 
       # Validates that the data parameter is present and is a hash.
@@ -144,7 +131,7 @@ module Attio
       # @param data [Hash, nil] The data to validate
       # @raise [ArgumentError] if data is nil or not a hash
       # @api private
-      private def validate_data!(data)
+      private def validate_record_data!(data)
         raise ArgumentError, "Data is required" if data.nil?
         raise ArgumentError, "Data must be a hash" unless data.is_a?(Hash)
       end
