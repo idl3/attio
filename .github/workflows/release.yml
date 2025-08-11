@@ -1,0 +1,147 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  RUBY_PLATFORM: ruby
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby-version: ['3.0', '3.1', '3.2', '3.3']
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Ruby ${{ matrix.ruby-version }}
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ matrix.ruby-version }}
+        bundler-cache: true
+
+    - name: Run tests
+      run: bundle exec rspec
+
+    - name: Run RuboCop
+      if: matrix.ruby-version == '3.3'
+      run: bundle exec rubocop
+
+  build-and-publish:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.3'
+        bundler-cache: true
+
+    - name: Extract version from tag
+      id: version
+      run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+    - name: Build gem
+      run: |
+        bundle exec gem build attio.gemspec
+        echo "GEM_FILE=$(ls attio-*.gem)" >> $GITHUB_ENV
+
+    - name: Publish to RubyGems
+      run: |
+        mkdir -p ~/.gem
+        cat << 'EOF' > ~/.gem/credentials
+        ---
+        :rubygems_api_key: ${{ secrets.RUBYGEMS_API_KEY }}
+        EOF
+        chmod 0600 ~/.gem/credentials
+        gem push ${{ env.GEM_FILE }}
+
+    - name: Generate changelog
+      id: changelog
+      run: |
+        if [ -f CHANGELOG.md ]; then
+          # Extract changelog section for this version
+          awk "/^## \[?${{ steps.version.outputs.version }}\]?/ {flag=1; next} /^## / && flag {flag=0} flag" CHANGELOG.md > release_changelog.md
+          if [ -s release_changelog.md ]; then
+            echo "changelog_content<<EOF" >> $GITHUB_OUTPUT
+            cat release_changelog.md >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+          else
+            echo "changelog_content=Release ${{ steps.version.outputs.version }}" >> $GITHUB_OUTPUT
+          fi
+        else
+          echo "changelog_content=Release ${{ steps.version.outputs.version }}" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Create GitHub Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ steps.version.outputs.version }}
+        body: ${{ steps.changelog.outputs.changelog_content }}
+        draft: false
+        prerelease: false
+
+    - name: Upload gem to release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ${{ env.GEM_FILE }}
+        asset_name: ${{ env.GEM_FILE }}
+        asset_content_type: application/x-tar
+
+  update-docs:
+    needs: [test, build-and-publish]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        ref: main
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.3'
+        bundler-cache: true
+
+    - name: Extract version from tag
+      id: version
+      run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+    - name: Generate documentation
+      run: |
+        bundle exec rake docs:generate
+
+    - name: Commit and push documentation
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add docs/
+        if ! git diff --staged --quiet; then
+          git commit -m "Update documentation for release ${{ steps.version.outputs.version }}"
+          git push
+        else
+          echo "No documentation changes to commit"
+        fi

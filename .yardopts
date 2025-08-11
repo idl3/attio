@@ -1,0 +1,18 @@
+--markup markdown
+--markup-provider redcarpet
+--output-dir docs
+--private
+--protected
+--no-cache
+--embed-mixins
+--hide-void-return
+--readme README.md
+--main README.md
+--title "Attio Ruby Client Documentation"
+--template default
+--markup-provider=redcarpet
+--charset utf-8
+lib/**/*.rb
+-
+README.md
+CHANGELOG.md

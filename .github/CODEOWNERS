@@ -1,0 +1,28 @@
+# Global ownership
+* @ernest-codes
+
+# Core library files
+/lib/ @ernest-codes
+
+# Configuration files
+/.github/ @ernest-codes
+/.rubocop.yml @ernest-codes
+/.codecov.yml @ernest-codes
+/Gemfile @ernest-codes
+/attio.gemspec @ernest-codes
+/Rakefile @ernest-codes
+
+# Tests
+/spec/ @ernest-codes
+
+# Documentation
+/README.md @ernest-codes
+/CHANGELOG.md @ernest-codes
+/docs/ @ernest-codes
+
+# CI/CD workflows - require review for changes
+/.github/workflows/ @ernest-codes
+/.github/dependabot.yml @ernest-codes
+
+# Security-sensitive files
+/danger/ @ernest-codes
