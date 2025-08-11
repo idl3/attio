@@ -23,7 +23,13 @@ jobs:
       uses: ruby/setup-ruby@v1
       with:
         ruby-version: ${{ matrix.ruby-version }}
-        bundler-cache: true
+        bundler-cache: false
+    
+    - name: Install dependencies
+      run: |
+        gem install bundler
+        bundle config set --local deployment false
+        bundle install
 
     - name: Run tests
       run: bundle exec rspec
@@ -48,7 +54,13 @@ jobs:
       uses: ruby/setup-ruby@v1
       with:
         ruby-version: '3.4'
-        bundler-cache: true
+        bundler-cache: false
+    
+    - name: Install dependencies
+      run: |
+        gem install bundler
+        bundle config set --local deployment false
+        bundle install
 
     - name: Extract version from tag
       id: version
@@ -124,7 +136,13 @@ jobs:
       uses: ruby/setup-ruby@v1
       with:
         ruby-version: '3.4'
-        bundler-cache: true
+        bundler-cache: false
+    
+    - name: Install dependencies
+      run: |
+        gem install bundler
+        bundle config set --local deployment false
+        bundle install
 
     - name: Extract version from tag
       id: version

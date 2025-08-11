@@ -24,7 +24,13 @@ jobs:
       uses: ruby/setup-ruby@v1
       with:
         ruby-version: ${{ matrix.ruby-version }}
-        bundler-cache: true
+        bundler-cache: false
+    
+    - name: Install dependencies
+      run: |
+        gem install bundler
+        bundle config set --local deployment false
+        bundle install
 
     - name: Create coverage directory
       run: mkdir -p coverage
@@ -55,7 +61,13 @@ jobs:
       uses: ruby/setup-ruby@v1
       with:
         ruby-version: '3.4'
-        bundler-cache: true
+        bundler-cache: false
+    
+    - name: Install dependencies
+      run: |
+        gem install bundler
+        bundle config set --local deployment false
+        bundle install
 
     - name: Run RuboCop
       run: bundle exec rubocop --parallel --format github
@@ -70,7 +82,13 @@ jobs:
       uses: ruby/setup-ruby@v1
       with:
         ruby-version: '3.4'
-        bundler-cache: true
+        bundler-cache: false
+    
+    - name: Install dependencies
+      run: |
+        gem install bundler
+        bundle config set --local deployment false
+        bundle install
 
     - name: Run bundler-audit
       run: |
@@ -94,7 +112,13 @@ jobs:
       uses: ruby/setup-ruby@v1
       with:
         ruby-version: '3.4'
-        bundler-cache: true
+        bundler-cache: false
+    
+    - name: Install dependencies
+      run: |
+        gem install bundler
+        bundle config set --local deployment false
+        bundle install
 
     - name: Build gem
       run: bundle exec gem build attio.gemspec

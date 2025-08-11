@@ -71,7 +71,13 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.4'
-          bundler-cache: true
+          bundler-cache: false
+      
+      - name: Install dependencies
+        run: |
+          gem install bundler
+          bundle config set --local deployment false
+          bundle install
 
       - name: Validate gemspec
         run: |
@@ -96,7 +102,13 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.4'
-          bundler-cache: true
+          bundler-cache: false
+      
+      - name: Install dependencies
+        run: |
+          gem install bundler
+          bundle config set --local deployment false
+          bundle install
 
       - name: Run Danger
         run: bundle exec danger
@@ -112,7 +124,13 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.4'
-          bundler-cache: true
+          bundler-cache: false
+      
+      - name: Install dependencies
+        run: |
+          gem install bundler
+          bundle config set --local deployment false
+          bundle install
 
       - name: Run security checks
         run: |
