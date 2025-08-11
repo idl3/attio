@@ -59,9 +59,9 @@ module Attio
       # @param field_name [String] The field name for the error message
       # @raise [ArgumentError] if value is nil or not a hash
       private def validate_required_hash!(value, field_name)
-        return if value.is_a?(Hash)
+        return if value.is_a?(Hash) && !value.nil?
 
-        raise ArgumentError, "#{field_name} is required"
+        raise ArgumentError, "#{field_name} must be a hash"
       end
 
       # Validates parent object and record ID together
@@ -74,6 +74,7 @@ module Attio
       end
 
       private def request(method, path, params = {}, _headers = {})
+        # Path is already safely constructed by the resource methods
         connection = client.connection
 
         case method

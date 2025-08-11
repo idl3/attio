@@ -92,7 +92,7 @@ RSpec.describe Attio::Resources::Deals do
 
     it "raises error for nil data" do
       expect { deals.create(data: nil) }
-        .to raise_error(ArgumentError, "Data is required")
+        .to raise_error(ArgumentError, "Data must be a hash")
     end
 
     it "raises error for missing deal name" do
@@ -121,7 +121,7 @@ RSpec.describe Attio::Resources::Deals do
 
     it "raises error for nil data" do
       expect { deals.update(id: "deal_123", data: nil) }
-        .to raise_error(ArgumentError, "Data is required")
+        .to raise_error(ArgumentError, "Data must be a hash")
     end
   end
 

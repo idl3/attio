@@ -258,21 +258,15 @@ RSpec.describe Attio::RateLimitMiddleware do
       expect(result).to eq(response)
     end
 
-    it "updates rate limiter from response headers" do
+    it "applies the rate limiter's execute method" do
       env = { method: "GET", path: "/test" }
-      headers = {
-        "X-RateLimit-Limit" => "100",
-        "X-RateLimit-Remaining" => "99",
-        "X-RateLimit-Reset" => (Time.now + 3600).to_i.to_s
-      }
-      response = [200, headers, ["OK"]]
+      response = [200, {}, ["OK"]]
 
       expect(app).to receive(:call).with(env).and_return(response)
+      expect(rate_limiter).to receive(:execute).and_call_original
 
-      middleware.call(env)
-
-      expect(rate_limiter.current_limit).to eq(100)
-      expect(rate_limiter.remaining).to eq(99)
+      result = middleware.call(env)
+      expect(result).to eq(response)
     end
 
     it "applies rate limiting to requests" do

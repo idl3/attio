@@ -204,35 +204,62 @@ module Attio
       end
 
       private def validate_bulk_updates!(updates)
-        raise ArgumentError, "Updates array is required for bulk update" if updates.nil?
-        raise ArgumentError, "Updates must be an array for bulk update" unless updates.is_a?(Array)
-        raise ArgumentError, "Updates array cannot be empty for bulk update" if updates.empty?
-        raise ArgumentError, "Too many updates (max #{MAX_BATCH_SIZE * 10})" if updates.size > MAX_BATCH_SIZE * 10
+        validate_array!(updates, "Updates", "bulk update")
+        validate_max_size!(updates, "updates")
 
         updates.each_with_index do |update, index|
-          raise ArgumentError, "Update at index #{index} must be a hash" unless update.is_a?(Hash)
-
-          raise ArgumentError, "Update at index #{index} must have an :id" unless update[:id]
-
-          raise ArgumentError, "Update at index #{index} must have :data" unless update[:data]
+          validate_update_item!(update, index)
         end
+      end
+
+      private def validate_update_item!(update, index)
+        raise ArgumentError, "Update at index #{index} must be a hash" unless update.is_a?(Hash)
+        raise ArgumentError, "Update at index #{index} must have an :id" unless update[:id]
+        raise ArgumentError, "Update at index #{index} must have :data" unless update[:data]
       end
 
       private def validate_bulk_ids!(ids)
-        raise ArgumentError, "IDs array is required for bulk operation" if ids.nil?
-        raise ArgumentError, "IDs must be an array for bulk operation" unless ids.is_a?(Array)
-        raise ArgumentError, "IDs array cannot be empty for bulk operation" if ids.empty?
-        raise ArgumentError, "Too many IDs (max #{MAX_BATCH_SIZE * 10})" if ids.size > MAX_BATCH_SIZE * 10
+        validate_array!(ids, "IDs", "bulk operation")
+        validate_max_size!(ids, "IDs")
 
         ids.each_with_index do |id, index|
-          raise ArgumentError, "ID at index #{index} cannot be nil or empty" if id.nil? || id.to_s.strip.empty?
+          validate_id_item!(id, index)
         end
       end
 
+      private def validate_id_item!(id, index)
+        return unless id.nil? || id.to_s.strip.empty?
+
+        raise ArgumentError, "ID at index #{index} cannot be nil or empty"
+      end
+
+      private def validate_array!(array, name, operation)
+        raise ArgumentError, "#{name} array is required for #{operation}" if array.nil?
+        raise ArgumentError, "#{name} must be an array for #{operation}" unless array.is_a?(Array)
+        raise ArgumentError, "#{name} array cannot be empty for #{operation}" if array.empty?
+      end
+
+      private def validate_max_size!(array, name)
+        max = MAX_BATCH_SIZE * 10
+        return unless array.size > max
+
+        raise ArgumentError, "Too many #{name} (max #{max})"
+      end
+
       private def merge_batch_results(results)
-        merged = {
+        merged = initialize_merged_result(results.size)
+
+        results.each do |result|
+          merge_single_result!(merged, result)
+        end
+
+        merged
+      end
+
+      private def initialize_merged_result(batch_count)
+        {
           "success" => true,
-          "total_batches" => results.size,
+          "total_batches" => batch_count,
           "records" => [],
           "errors" => [],
           "statistics" => {
@@ -242,22 +269,21 @@ module Attio
             "failed" => 0,
           },
         }
+      end
 
-        results.each do |result|
-          merged["records"].concat(result["records"] || [])
-          merged["errors"].concat(result["errors"] || [])
+      private def merge_single_result!(merged, result)
+        merged["records"].concat(result["records"] || [])
+        merged["errors"].concat(result["errors"] || [])
+        merge_statistics!(merged["statistics"], result["statistics"])
+        merged["success"] &&= result["success"] != false
+      end
 
-          if result["statistics"]
-            merged["statistics"]["created"] += result["statistics"]["created"] || 0
-            merged["statistics"]["updated"] += result["statistics"]["updated"] || 0
-            merged["statistics"]["deleted"] += result["statistics"]["deleted"] || 0
-            merged["statistics"]["failed"] += result["statistics"]["failed"] || 0
-          end
+      private def merge_statistics!(target, source)
+        return unless source
 
-          merged["success"] &&= result["success"] != false
+        %w[created updated deleted failed].each do |key|
+          target[key] += source[key] || 0
         end
-
-        merged
       end
     end
   end

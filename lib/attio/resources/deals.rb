@@ -55,7 +55,7 @@ module Attio
       # @return [Hash] The created deal
       def create(data:)
         validate_required_hash!(data, "Data")
-        validate_required_string!(data[:name], "Deal name") if data.is_a?(Hash)
+        validate_required_string!(data[:name], "Deal name")
 
         request(:post, "objects/deals/records", { data: data })
       end

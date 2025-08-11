@@ -57,6 +57,10 @@ module Attio
         headers: headers.merge("Content-Type" => "application/json"),
         timeout: timeout,
         connecttimeout: timeout,
+        # SSL/TLS security settings
+        ssl_verifypeer: true,
+        ssl_verifyhost: 2,
+        followlocation: false, # Prevent following redirects for security
       }.merge(options)
 
       request = Typhoeus::Request.new(url, request_options)

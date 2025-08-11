@@ -136,7 +136,7 @@ RSpec.describe Attio::Resources::WorkspaceMembers do
 
     it "raises error for nil data" do
       expect { workspace_members.update(member_id: "user_123", data: nil) }
-        .to raise_error(ArgumentError, "Data is required")
+        .to raise_error(ArgumentError, "Data must be a hash")
     end
   end
 

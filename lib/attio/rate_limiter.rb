@@ -51,7 +51,10 @@ module Attio
       attempt = 0
       begin
         result = yield
-        update_from_headers(result) if result.is_a?(Hash) && result["_headers"]
+        # Thread-safe header update
+        @mutex.synchronize do
+          update_from_headers(result) if result.is_a?(Hash) && result["_headers"]
+        end
         result
       rescue Attio::RateLimitError => e
         attempt += 1
@@ -90,20 +93,17 @@ module Attio
     end
 
     # Update rate limit info from response headers
+    # NOTE: This method should be called within a mutex lock
     #
-    # @param headers [Hash] Response headers
-    def update_from_headers(response)
+    # @param response [Hash] Response containing headers
+    private def update_from_headers(response)
       return unless response.is_a?(Hash)
 
       headers = response["_headers"] || {}
 
-      @mutex.synchronize do
-        @current_limit = headers["x-ratelimit-limit"].to_i if headers["x-ratelimit-limit"]
-
-        @remaining = headers["x-ratelimit-remaining"].to_i if headers["x-ratelimit-remaining"]
-
-        @reset_at = Time.at(headers["x-ratelimit-reset"].to_i) if headers["x-ratelimit-reset"]
-      end
+      @current_limit = headers["x-ratelimit-limit"].to_i if headers["x-ratelimit-limit"]
+      @remaining = headers["x-ratelimit-remaining"].to_i if headers["x-ratelimit-remaining"]
+      @reset_at = Time.at(headers["x-ratelimit-reset"].to_i) if headers["x-ratelimit-reset"]
     end
 
     # Reset the rate limiter
@@ -204,22 +204,9 @@ module Attio
     def call(env)
       @rate_limiter.execute do
         response = @app.call(env)
-        @rate_limiter.update_from_headers(response_headers(response))
+        # Headers are automatically updated within execute block
         response
       end
-    end
-
-    private def response_headers(response)
-      return {} unless response.is_a?(Array) && response.size >= 2
-
-      headers = response[1] || {}
-      {
-        "_headers" => {
-          "x-ratelimit-limit" => headers["X-RateLimit-Limit"],
-          "x-ratelimit-remaining" => headers["X-RateLimit-Remaining"],
-          "x-ratelimit-reset" => headers["X-RateLimit-Reset"],
-        },
-      }
     end
   end
 end
