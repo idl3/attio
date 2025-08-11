@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby-version: ['3.0', '3.1', '3.2', '3.3']
+        ruby-version: ['3.0', '3.1', '3.2', '3.3', '3.4']
 
     steps:
     - uses: actions/checkout@v4
@@ -37,7 +37,7 @@ jobs:
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v4
-      if: matrix.ruby-version == '3.3'
+      if: matrix.ruby-version == '3.4'
       with:
         files: ./coverage/coverage.xml,./coverage/.resultset.json
         flags: unittests
@@ -54,7 +54,7 @@ jobs:
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
-        ruby-version: '3.3'
+        ruby-version: '3.4'
         bundler-cache: true
 
     - name: Run RuboCop
@@ -69,7 +69,7 @@ jobs:
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
-        ruby-version: '3.3'
+        ruby-version: '3.4'
         bundler-cache: true
 
     - name: Run bundler-audit
@@ -93,7 +93,7 @@ jobs:
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
-        ruby-version: '3.3'
+        ruby-version: '3.4'
         bundler-cache: true
 
     - name: Build gem

@@ -8,6 +8,11 @@
 
 Ruby client for the [Attio CRM API](https://developers.attio.com/). This library provides easy access to the Attio API, allowing you to manage records, objects, lists, and more.
 
+## Requirements
+
+- Ruby 3.0 or higher (tested with Ruby 3.0, 3.1, 3.2, 3.3, and 3.4)
+- Bundler
+
 ## Installation
 
 Add this line to your application's Gemfile:

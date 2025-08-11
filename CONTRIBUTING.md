@@ -19,17 +19,17 @@ Thank you for your interest in contributing to the Attio Ruby client! This guide
 1. Fork the repository on GitHub
 2. Clone your fork locally:
    ```bash
-   git clone https://github.com/YOUR_USERNAME/attio-ruby.git
-   cd attio-ruby
+   git clone https://github.com/YOUR_USERNAME/attio.git
+   cd attio
    ```
 3. Add the upstream remote:
    ```bash
-   git remote add upstream https://github.com/idl3/attio-ruby.git
+   git remote add upstream https://github.com/idl3/attio.git
    ```
 
 ## Development Setup
 
-1. Install Ruby 3.0 or higher
+1. Install Ruby 3.0 or higher (tested with Ruby 3.0 - 3.4)
 2. Install dependencies:
    ```bash
    bundle install

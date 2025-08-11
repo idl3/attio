@@ -54,7 +54,7 @@ jobs:
           fi
 
           # Check if CHANGELOG.md was modified
-          if git diff --name-only origin/main...HEAD | grep -q "CHANGELOG.md"; then
+          if git diff --name-only origin/master...HEAD | grep -q "CHANGELOG.md"; then
             echo "✅ CHANGELOG.md was updated"
           else
             echo "❌ Please update CHANGELOG.md with your changes"
@@ -70,7 +70,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.3'
+          ruby-version: '3.4'
           bundler-cache: true
 
       - name: Validate gemspec
@@ -95,7 +95,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.3'
+          ruby-version: '3.4'
           bundler-cache: true
 
       - name: Run Danger
@@ -111,7 +111,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.3'
+          ruby-version: '3.4'
           bundler-cache: true
 
       - name: Run security checks
