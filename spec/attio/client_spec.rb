@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Attio::Client do
   let(:api_key) { "test_api_key" }
   let(:client) { described_class.new(api_key: api_key) }
@@ -11,7 +13,6 @@ RSpec.describe Attio::Client do
     it "sets the API key" do
       expect(client.api_key).to eq(api_key)
     end
-
 
     it "uses the default timeout" do
       expect(client.timeout).to eq(Attio::Client::DEFAULT_TIMEOUT)

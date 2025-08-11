@@ -1,38 +1,40 @@
-require 'simplecov'
-require 'simplecov-console'
+# frozen_string_literal: true
+
+require "simplecov"
+require "simplecov-console"
 
 # Configure coverage formatters based on environment
-if ENV['COVERAGE']
-  SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new([
-    SimpleCov::Formatter::HTMLFormatter,
-    SimpleCov::Formatter::Console,
-    SimpleCov::Formatter::SimpleFormatter
-  ])
-else
-  SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new([
-    SimpleCov::Formatter::HTMLFormatter,
-    SimpleCov::Formatter::Console
-  ])
-end
+SimpleCov.formatter = if ENV["COVERAGE"]
+                        SimpleCov::Formatter::MultiFormatter.new([
+                          SimpleCov::Formatter::HTMLFormatter,
+                          SimpleCov::Formatter::Console,
+                          SimpleCov::Formatter::SimpleFormatter,
+                        ])
+                      else
+                        SimpleCov::Formatter::MultiFormatter.new([
+                          SimpleCov::Formatter::HTMLFormatter,
+                          SimpleCov::Formatter::Console,
+                        ])
+                      end
 
 SimpleCov.start do
-  add_filter '/spec/'
-  add_filter '/vendor/'
-  add_filter '/bin/'
-  add_filter '/docs/'
-  add_filter '/coverage/'
-  add_filter '/test*'
-  add_filter '/run_tests.rb'
+  add_filter "/spec/"
+  add_filter "/vendor/"
+  add_filter "/bin/"
+  add_filter "/docs/"
+  add_filter "/coverage/"
+  add_filter "/test*"
+  add_filter "/run_tests.rb"
   minimum_coverage 85
 end
 
-require 'bundler/setup'
-require 'attio'
-require 'webmock/rspec'
-require 'pry'
+require "bundler/setup"
+require "attio"
+require "webmock/rspec"
+require "pry"
 
 # Load support files
-Dir[File.join(File.dirname(__FILE__), 'support', '**', '*.rb')].each { |f| require f }
+Dir[File.join(File.dirname(__FILE__), "support", "**", "*.rb")].each { |f| require f }
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|
@@ -49,9 +51,7 @@ RSpec.configure do |config|
   config.disable_monkey_patching!
   config.warnings = true
 
-  if config.files_to_run.one?
-    config.default_formatter = "doc"
-  end
+  config.default_formatter = "doc" if config.files_to_run.one?
 
   config.profile_examples = 10
   config.order = :random

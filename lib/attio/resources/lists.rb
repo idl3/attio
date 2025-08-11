@@ -1,5 +1,16 @@
+# frozen_string_literal: true
+
 module Attio
   module Resources
+    # API resource for managing Attio lists and list entries
+    #
+    # Lists are custom collections for organizing records in your workspace.
+    #
+    # @example Listing all lists
+    #   client.lists.list
+    #
+    # @example Adding an entry to a list
+    #   client.lists.create_entry(id: "list_id", data: { record_id: "rec_123" })
     class Lists < Base
       def list(**params)
         request(:get, "lists", params)
@@ -33,21 +44,19 @@ module Attio
         request(:delete, "lists/#{list_id}/entries/#{entry_id}")
       end
 
-      private
-
-      def validate_id!(id)
+      private def validate_id!(id)
         raise ArgumentError, "List ID is required" if id.nil? || id.to_s.strip.empty?
       end
 
-      def validate_list_id!(list_id)
+      private def validate_list_id!(list_id)
         raise ArgumentError, "List ID is required" if list_id.nil? || list_id.to_s.strip.empty?
       end
 
-      def validate_entry_id!(entry_id)
+      private def validate_entry_id!(entry_id)
         raise ArgumentError, "Entry ID is required" if entry_id.nil? || entry_id.to_s.strip.empty?
       end
 
-      def validate_data!(data)
+      private def validate_data!(data)
         raise ArgumentError, "Data is required" if data.nil?
         raise ArgumentError, "Data must be a hash" unless data.is_a?(Hash)
       end

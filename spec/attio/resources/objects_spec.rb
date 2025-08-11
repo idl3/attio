@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Attio::Resources::Objects do
   let(:client) { instance_double(Attio::Client) }
   let(:objects) { described_class.new(client) }

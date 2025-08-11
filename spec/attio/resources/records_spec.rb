@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Attio::Resources::Records do
   let(:client) { instance_double(Attio::Client) }
   let(:records) { described_class.new(client) }
@@ -107,18 +109,26 @@ RSpec.describe Attio::Resources::Records do
     end
 
     it "validates object parameter" do
-      expect { records.update(object: nil, id: id, data: data) }.to raise_error(ArgumentError, "Object type is required")
+      expect do
+        records.update(object: nil, id: id, data: data)
+      end.to raise_error(ArgumentError, "Object type is required")
       expect { records.update(object: "", id: id, data: data) }.to raise_error(ArgumentError, "Object type is required")
     end
 
     it "validates id parameter" do
-      expect { records.update(object: object, id: nil, data: data) }.to raise_error(ArgumentError, "Record ID is required")
-      expect { records.update(object: object, id: "", data: data) }.to raise_error(ArgumentError, "Record ID is required")
+      expect do
+        records.update(object: object, id: nil, data: data)
+      end.to raise_error(ArgumentError, "Record ID is required")
+      expect do
+        records.update(object: object, id: "", data: data)
+      end.to raise_error(ArgumentError, "Record ID is required")
     end
 
     it "validates data parameter" do
       expect { records.update(object: object, id: id, data: nil) }.to raise_error(ArgumentError, "Data is required")
-      expect { records.update(object: object, id: id, data: "not a hash") }.to raise_error(ArgumentError, "Data must be a hash")
+      expect do
+        records.update(object: object, id: id, data: "not a hash")
+      end.to raise_error(ArgumentError, "Data must be a hash")
     end
   end
 

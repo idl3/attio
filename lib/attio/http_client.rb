@@ -1,7 +1,15 @@
-require 'typhoeus'
-require 'json'
+# frozen_string_literal: true
+
+require "typhoeus"
+require "json"
 
 module Attio
+  # HTTP client for making API requests to Attio
+  #
+  # This class handles the low-level HTTP communication with the Attio API,
+  # including request execution, response parsing, and error handling.
+  #
+  # @api private
   class HttpClient
     DEFAULT_TIMEOUT = 30
 
@@ -33,16 +41,14 @@ module Attio
       execute_request(:delete, path)
     end
 
-    private
-
-    def execute_request(method, path, options = {})
+    private def execute_request(method, path, options = {})
       url = "#{base_url}/#{path}"
-      
+
       request_options = {
         method: method,
-        headers: headers.merge('Content-Type' => 'application/json'),
+        headers: headers.merge("Content-Type" => "application/json"),
         timeout: timeout,
-        connecttimeout: timeout
+        connecttimeout: timeout,
       }.merge(options)
 
       request = Typhoeus::Request.new(url, request_options)
@@ -51,42 +57,57 @@ module Attio
       handle_response(response)
     end
 
-    def handle_response(response)
-      case response.code
-      when 0
-        # Timeout or connection error
-        if response.timed_out?
-          raise TimeoutError, "Request timed out"
-        else
-          raise ConnectionError, "Connection failed: #{response.return_message}"
-        end
-      when 200..299
-        parse_json(response.body)
-      when 401
-        raise AuthenticationError, parse_error_message(response)
-      when 404
-        raise NotFoundError, parse_error_message(response)
-      when 422
-        raise ValidationError, parse_error_message(response)
-      when 429
-        raise RateLimitError, parse_error_message(response)
-      when 500..599
-        raise ServerError, parse_error_message(response)
-      else
-        raise Error, "Request failed with status #{response.code}: #{parse_error_message(response)}"
-      end
+    private def handle_response(response)
+      return handle_connection_error(response) if response.code == 0
+      return parse_json(response.body) if (200..299).cover?(response.code)
+
+      handle_error_response(response)
     end
 
-    def parse_json(body)
+    private def handle_connection_error(response)
+      raise TimeoutError, "Request timed out" if response.timed_out?
+
+      raise ConnectionError, "Connection failed: #{response.return_message}"
+    end
+
+    private def handle_error_response(response)
+      error_class = error_class_for_status(response.code)
+      message = parse_error_message(response)
+
+      # Add status code to message for generic errors
+      message = "Request failed with status #{response.code}: #{message}" if error_class == Error
+
+      raise error_class, message
+    end
+
+    private def error_class_for_status(status)
+      error_map = {
+        401 => AuthenticationError,
+        404 => NotFoundError,
+        422 => ValidationError,
+        429 => RateLimitError,
+      }
+      return error_map[status] if error_map.key?(status)
+      return ServerError if (500..599).cover?(status)
+
+      Error
+    end
+
+    private def parse_json(body)
       return {} if body.nil? || body.empty?
+
       JSON.parse(body)
     rescue JSON::ParserError => e
       raise Error, "Invalid JSON response: #{e.message}"
     end
 
-    def parse_error_message(response)
-      body = parse_json(response.body) rescue response.body
-      
+    private def parse_error_message(response)
+      body = begin
+        parse_json(response.body)
+      rescue StandardError
+        response.body
+      end
+
       if body.is_a?(Hash)
         body["error"] || body["message"] || body.to_s
       else

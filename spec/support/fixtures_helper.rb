@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 module FixturesHelper
   def fixture_path(filename)
-    File.join(File.dirname(__FILE__), '..', 'fixtures', filename)
+    File.join(File.dirname(__FILE__), "..", "fixtures", filename)
   end
 
   def fixture(filename)

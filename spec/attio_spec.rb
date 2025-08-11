@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 RSpec.describe Attio do
   it "has a version number" do
-    expect(Attio::VERSION).not_to be nil
+    expect(Attio::VERSION).not_to be_nil
   end
 
   describe ".client" do
@@ -13,7 +15,7 @@ RSpec.describe Attio do
     it "creates different client instances for different API keys" do
       client1 = described_class.client(api_key: "key1")
       client2 = described_class.client(api_key: "key2")
-      
+
       expect(client1).not_to eq(client2)
       expect(client1.api_key).to eq("key1")
       expect(client2.api_key).to eq("key2")

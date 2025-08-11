@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Attio::Resources::Base do
   let(:client) { instance_double(Attio::Client) }
   let(:connection) { instance_double(Attio::HttpClient) }
@@ -64,7 +66,9 @@ RSpec.describe Attio::Resources::Base do
 
     context "with unsupported method" do
       it "raises ArgumentError" do
-        expect { resource.send(:request, :invalid, path) }.to raise_error(ArgumentError, "Unsupported HTTP method: invalid")
+        expect do
+          resource.send(:request, :invalid, path)
+        end.to raise_error(ArgumentError, "Unsupported HTTP method: invalid")
       end
     end
   end

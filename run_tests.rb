@@ -1,16 +1,17 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 
 # Add lib to load path
-$LOAD_PATH.unshift(File.expand_path('../lib', __FILE__))
+$LOAD_PATH.unshift(File.expand_path("lib", __dir__))
 
 # Load the gem
-require 'attio'
+require "attio"
 
 # Basic smoke test
 begin
   puts "Testing Attio gem..."
   puts "Version: #{Attio::VERSION}"
-  
+
   # Test client initialization
   begin
     Attio::Client.new(api_key: nil)
@@ -18,11 +19,11 @@ begin
   rescue ArgumentError => e
     puts "✓ Client validation works: #{e.message}"
   end
-  
+
   # Test client creation
   client = Attio::Client.new(api_key: "test_key")
   puts "✓ Client created successfully"
-  
+
   # Test resource access
   puts "✓ Records resource available: #{client.records.class}"
   puts "✓ Objects resource available: #{client.objects.class}"
@@ -30,7 +31,7 @@ begin
   puts "✓ Workspaces resource available: #{client.workspaces.class}"
   puts "✓ Attributes resource available: #{client.attributes.class}"
   puts "✓ Users resource available: #{client.users.class}"
-  
+
   # Test error classes
   [
     Attio::Error,
@@ -38,13 +39,12 @@ begin
     Attio::NotFoundError,
     Attio::ValidationError,
     Attio::RateLimitError,
-    Attio::ServerError
+    Attio::ServerError,
   ].each do |error_class|
     puts "✓ #{error_class} is defined"
   end
-  
+
   puts "\nAll basic tests passed!"
-  
 rescue StandardError => e
   puts "ERROR: #{e.message}"
   puts e.backtrace

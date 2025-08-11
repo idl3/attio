@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 RSpec.describe Attio::Resources::Lists do
   let(:client) { instance_double(Attio::Client) }
   let(:lists) { described_class.new(client) }
@@ -170,15 +172,27 @@ RSpec.describe Attio::Resources::Lists do
     end
 
     it "validates list_id parameter" do
-      expect { lists.delete_entry(list_id: nil, entry_id: entry_id) }.to raise_error(ArgumentError, "List ID is required")
-      expect { lists.delete_entry(list_id: "", entry_id: entry_id) }.to raise_error(ArgumentError, "List ID is required")
-      expect { lists.delete_entry(list_id: "  ", entry_id: entry_id) }.to raise_error(ArgumentError, "List ID is required")
+      expect do
+        lists.delete_entry(list_id: nil, entry_id: entry_id)
+      end.to raise_error(ArgumentError, "List ID is required")
+      expect do
+        lists.delete_entry(list_id: "", entry_id: entry_id)
+      end.to raise_error(ArgumentError, "List ID is required")
+      expect do
+        lists.delete_entry(list_id: "  ", entry_id: entry_id)
+      end.to raise_error(ArgumentError, "List ID is required")
     end
 
     it "validates entry_id parameter" do
-      expect { lists.delete_entry(list_id: list_id, entry_id: nil) }.to raise_error(ArgumentError, "Entry ID is required")
-      expect { lists.delete_entry(list_id: list_id, entry_id: "") }.to raise_error(ArgumentError, "Entry ID is required")
-      expect { lists.delete_entry(list_id: list_id, entry_id: "  ") }.to raise_error(ArgumentError, "Entry ID is required")
+      expect do
+        lists.delete_entry(list_id: list_id, entry_id: nil)
+      end.to raise_error(ArgumentError, "Entry ID is required")
+      expect do
+        lists.delete_entry(list_id: list_id, entry_id: "")
+      end.to raise_error(ArgumentError, "Entry ID is required")
+      expect do
+        lists.delete_entry(list_id: list_id, entry_id: "  ")
+      end.to raise_error(ArgumentError, "Entry ID is required")
     end
   end
 end

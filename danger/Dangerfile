@@ -7,13 +7,11 @@ warn("PR is classed as Work in Progress") if github.pr_title.include? "WIP"
 warn("Big PR") if git.lines_of_code > 500
 
 # Don't let testing shortcuts get into main by accident
-fail("fdescribe left in tests") if `grep -r fdescribe spec/ `.length > 1
-fail("fit left in tests") if `grep -r fit spec/ `.length > 1
+raise("fdescribe left in tests") if `grep -r fdescribe spec/ `.length > 1
+raise("fit left in tests") if `grep -r fit spec/ `.length > 1
 
 # Ensure a clean commit history
-if git.commits.any? { |c| c.message =~ /^fixup!/ }
-  fail("Please squash fixup! commits before merging")
-end
+raise("Please squash fixup! commits before merging") if git.commits.any? { |c| c.message =~ /^fixup!/ }
 
 # Check for proper conventional commit format
 if github.pr_title !~ /^(feat|fix|docs|style|refactor|perf|test|chore|ci|build)(\(.+\))?: .+/
@@ -27,27 +25,21 @@ end
 
 # Check if package files have been updated
 package_updated = git.modified_files.include?("attio.gemspec") || git.modified_files.include?("Gemfile")
-if package_updated
-  message("📦 Package files have been updated")
-end
+message("📦 Package files have been updated") if package_updated
 
 # Encourage changelog updates for non-trivial changes
 has_app_changes = git.modified_files.any? { |file| file.start_with?("lib/") }
 has_changelog_changes = git.modified_files.include?("CHANGELOG.md")
 
-if has_app_changes && !has_changelog_changes
+if has_app_changes && !has_changelog_changes && github.pr_title !~ /^(chore|ci|docs|style|test):/
   # Skip for certain PR types
-  unless github.pr_title =~ /^(chore|ci|docs|style|test):/
-    warn("Consider updating CHANGELOG.md for this change")
-  end
+  warn("Consider updating CHANGELOG.md for this change")
 end
 
 # Check for TODO comments in the diff
 git.diff.each do |file|
   file.patch.lines.each_with_index do |line, index|
-    if line.start_with?("+") && line.include?("TODO")
-      warn("TODO comment added", file: file.path, line: index + 1)
-    end
+    warn("TODO comment added", file: file.path, line: index + 1) if line.start_with?("+") && line.include?("TODO")
   end
 end
 
@@ -55,9 +47,7 @@ end
 has_new_features = git.diff.any? { |file| file.patch.include?("+def ") && file.path.start_with?("lib/") }
 has_test_changes = git.modified_files.any? { |file| file.start_with?("spec/") }
 
-if has_new_features && !has_test_changes
-  warn("New features should include tests")
-end
+warn("New features should include tests") if has_new_features && !has_test_changes
 
 # Check for debugging code
 debugging_patterns = [
@@ -66,27 +56,25 @@ debugging_patterns = [
   "puts",
   "p ",
   "pp ",
-  "console.log"
+  "console.log",
 ]
 
 git.diff.each do |file|
   debugging_patterns.each do |pattern|
     if file.patch.include?("+") && file.patch.include?(pattern)
-      fail("Debugging code found: #{pattern} in #{file.path}")
+      raise("Debugging code found: #{pattern} in #{file.path}")
     end
   end
 end
 
 # Encourage documentation for public API changes
-public_api_changes = git.diff.any? do |file| 
-  file.path.start_with?("lib/") && 
-  file.patch.include?("+  def ") && 
-  !file.patch.include?("+  def self.")  # Skip private class methods
+public_api_changes = git.diff.any? do |file|
+  file.path.start_with?("lib/") &&
+    file.patch.include?("+  def ") &&
+    !file.patch.include?("+  def self.") # Skip private class methods
 end
 
-if public_api_changes
-  message("📝 Public API changes detected. Consider updating documentation.")
-end
+message("📝 Public API changes detected. Consider updating documentation.") if public_api_changes
 
 # Check for secrets or sensitive information
 sensitive_patterns = [
@@ -94,16 +82,16 @@ sensitive_patterns = [
   /secret/i,
   /password/i,
   /token/i,
-  /auth/i
+  /auth/i,
 ]
 
 git.diff.each do |file|
   file.patch.lines.each_with_index do |line, index|
-    if line.start_with?("+")
-      sensitive_patterns.each do |pattern|
-        if line.match?(pattern) && !line.include?("# ") # Not a comment
-          warn("Potential sensitive information detected", file: file.path, line: index + 1)
-        end
+    next unless line.start_with?("+")
+
+    sensitive_patterns.each do |pattern|
+      if line.match?(pattern) && !line.include?("# ") # Not a comment
+        warn("Potential sensitive information detected", file: file.path, line: index + 1)
       end
     end
   end

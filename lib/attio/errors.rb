@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 module Attio
   class Error < StandardError; end
-  
+
   class AuthenticationError < Error; end
   class NotFoundError < Error; end
   class ValidationError < Error; end

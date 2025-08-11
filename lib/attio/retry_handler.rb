@@ -1,4 +1,14 @@
+# frozen_string_literal: true
+
 module Attio
+  # Handles automatic retry logic for failed API requests
+  #
+  # This class implements exponential backoff retry strategy for
+  # transient errors like timeouts and rate limits.
+  #
+  # @example Using the retry handler
+  #   handler = RetryHandler.new(max_retries: 5)
+  #   handler.with_retry { api_client.get("/endpoint") }
   class RetryHandler
     DEFAULT_MAX_RETRIES = 3
     DEFAULT_RETRY_DELAY = 1 # seconds
@@ -7,12 +17,12 @@ module Attio
       HttpClient::TimeoutError,
       HttpClient::ConnectionError,
       ServerError,
-      RateLimitError
+      RateLimitError,
     ].freeze
 
     attr_reader :max_retries, :retry_delay, :backoff_factor, :logger
 
-    def initialize(max_retries: DEFAULT_MAX_RETRIES, 
+    def initialize(max_retries: DEFAULT_MAX_RETRIES,
                    retry_delay: DEFAULT_RETRY_DELAY,
                    backoff_factor: DEFAULT_BACKOFF_FACTOR,
                    logger: nil)
@@ -22,7 +32,7 @@ module Attio
       @logger = logger
     end
 
-    def with_retry(&block)
+    def with_retry
       retries = 0
       delay = retry_delay
 
@@ -30,7 +40,7 @@ module Attio
         yield
       rescue *RETRIABLE_ERRORS => e
         retries += 1
-        
+
         if retries <= max_retries
           log_retry(e, retries, delay)
           sleep(delay)
@@ -43,11 +53,9 @@ module Attio
       end
     end
 
-    private
-
-    def log_retry(error, attempt, delay)
+    private def log_retry(error, attempt, delay)
       return unless logger
-      
+
       logger.warn(
         "Retry attempt #{attempt}/#{max_retries}",
         error: error.class.name,
@@ -56,9 +64,9 @@ module Attio
       )
     end
 
-    def log_failure(error, attempts)
+    private def log_failure(error, attempts)
       return unless logger
-      
+
       logger.error(
         "Max retries exceeded",
         error: error.class.name,
