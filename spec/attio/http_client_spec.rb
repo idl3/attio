@@ -89,13 +89,23 @@ RSpec.describe Attio::HttpClient do
     end
 
     describe "#delete" do
-      it "makes a DELETE request" do
+      it "makes a DELETE request without body" do
         expect(Typhoeus::Request).to receive(:new).with(
           "#{base_url}/#{path}",
           hash_including(method: :delete)
         ).and_return(@request)
 
         result = client.delete(path)
+        expect(result).to eq({ "result" => "success" })
+      end
+
+      it "makes a DELETE request with body" do
+        expect(Typhoeus::Request).to receive(:new).with(
+          "#{base_url}/#{path}",
+          hash_including(method: :delete, body: body.to_json)
+        ).and_return(@request)
+
+        result = client.delete(path, body)
         expect(result).to eq({ "result" => "success" })
       end
     end

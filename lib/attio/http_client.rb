@@ -21,8 +21,12 @@ module Attio
       @timeout = timeout
     end
 
-    def get(path, params = {})
-      execute_request(:get, path, params: params)
+    def get(path, params = nil)
+      if params && !params.empty?
+        execute_request(:get, path, params: params)
+      else
+        execute_request(:get, path)
+      end
     end
 
     def post(path, body = {})
@@ -37,8 +41,12 @@ module Attio
       execute_request(:put, path, body: body.to_json)
     end
 
-    def delete(path)
-      execute_request(:delete, path)
+    def delete(path, params = nil)
+      if params
+        execute_request(:delete, path, body: params.to_json)
+      else
+        execute_request(:delete, path)
+      end
     end
 
     private def execute_request(method, path, options = {})
