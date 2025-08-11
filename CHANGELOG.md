@@ -5,6 +5,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2025-08-11
+
+### Added
+- **Workspace Members** resource for managing workspace access and permissions
+- **Deals** resource for sales pipeline management with win/loss tracking
+- **Meta API** resource for workspace identification and usage statistics
+- **Bulk Operations** with automatic batching (100 records per batch)
+- **Rate Limiting** with exponential backoff and request queuing
+- **SSL/TLS verification** for enhanced security
+- **Enhanced error classes** with proper attributes (retry_after for RateLimitError)
+- **Thread-safe rate limiter** implementation
+- Comprehensive architectural documentation in CONCEPTS.md
+- Development guidelines in CLAUDE.md
+- 116 new tests (392 total, up from 265)
+
+### Improved
+- **Security**: Added explicit SSL verification and disabled automatic redirects
+- **Thread Safety**: Fixed race conditions in rate limiter
+- **Code Quality**: Achieved 0 RuboCop violations (previously 6)
+- **Test Coverage**: 99.86% (718/719 lines)
+- **Performance**: Optimized bulk operations with efficient batching
+- **Validation**: Enhanced input validation to prevent injection attacks
+- **Documentation**: Updated README with comprehensive API coverage
+
+### Fixed
+- Thread safety issues in RateLimiter#update_from_headers
+- Complex validation methods refactored to reduce cyclomatic complexity
+- validate_required_hash now properly handles nil values
+- Removed unused api_key parameter from Meta#validate_key
+- Fixed conditional validation in Deals#create
+
+### Changed
+- **BREAKING**: Error messages for nil validation now say "must be a hash" instead of "is required"
+- RateLimitMiddleware simplified to avoid private method calls
+- Base resource class validation methods extracted for reusability
+
 ## [0.2.0] - 2025-08-11
 
 ### Added
