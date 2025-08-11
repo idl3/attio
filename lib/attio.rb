@@ -18,6 +18,11 @@ require "attio/resources/notes"
 require "attio/resources/tasks"
 require "attio/resources/comments"
 require "attio/resources/threads"
+require "attio/resources/workspace_members"
+require "attio/resources/deals"
+require "attio/resources/meta"
+require "attio/resources/bulk"
+require "attio/rate_limiter"
 
 # The main Attio module provides access to the Attio API client.
 #

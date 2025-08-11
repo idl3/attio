@@ -4,7 +4,7 @@
 [![Test Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)](https://github.com/idl3/attio/tree/master/spec)
 [![Documentation](https://img.shields.io/badge/docs-yard-blue.svg)](https://idl3.github.io/attio)
 [![Gem Version](https://badge.fury.io/rb/attio.svg)](https://badge.fury.io/rb/attio)
-[![RSpec](https://img.shields.io/badge/RSpec-265_tests-green.svg)](https://github.com/idl3/attio/tree/master/spec)
+[![RSpec](https://img.shields.io/badge/RSpec-381_tests-green.svg)](https://github.com/idl3/attio/tree/master/spec)
 
 Ruby client for the [Attio CRM API](https://developers.attio.com/). This library provides easy access to the Attio API, allowing you to manage records, objects, lists, and more.
 
@@ -361,6 +361,137 @@ users = client.users.list
 user = client.users.me
 ```
 
+### Advanced Features
+
+#### Workspace Members
+
+```ruby
+# List workspace members
+members = client.workspace_members.list
+
+# Invite a new member
+invitation = client.workspace_members.invite(
+  email: 'new.member@example.com',
+  role: 'member'  # admin, member, or guest
+)
+
+# Update member permissions
+client.workspace_members.update(
+  member_id: 'user-123',
+  data: { role: 'admin' }
+)
+
+# Remove a member
+client.workspace_members.remove(member_id: 'user-123')
+```
+
+#### Deals
+
+```ruby
+# List all deals
+deals = client.deals.list
+
+# Create a new deal
+deal = client.deals.create(
+  data: {
+    name: 'Enterprise Contract',
+    value: 50000,
+    stage_id: 'stage-negotiation',
+    company_id: 'company-123'
+  }
+)
+
+# Update deal stage
+client.deals.update_stage(id: 'deal-123', stage_id: 'stage-won')
+
+# Mark deal as won/lost
+client.deals.mark_won(id: 'deal-123', won_date: Date.today)
+client.deals.mark_lost(id: 'deal-123', lost_reason: 'Budget constraints')
+
+# List deals by various criteria
+pipeline_deals = client.deals.list_by_stage(stage_id: 'stage-proposal')
+company_deals = client.deals.list_by_company(company_id: 'company-123')
+my_deals = client.deals.list_by_owner(owner_id: 'user-456')
+```
+
+#### Bulk Operations
+
+```ruby
+# Bulk create records
+results = client.bulk.create_records(
+  object: 'people',
+  records: [
+    { name: 'John Doe', email: 'john@example.com' },
+    { name: 'Jane Smith', email: 'jane@example.com' },
+    # ... up to 100 records per batch
+  ]
+)
+
+# Bulk update records
+results = client.bulk.update_records(
+  object: 'companies',
+  updates: [
+    { id: 'company-1', data: { status: 'active' } },
+    { id: 'company-2', data: { status: 'inactive' } }
+  ]
+)
+
+# Bulk upsert (create or update based on matching)
+results = client.bulk.upsert_records(
+  object: 'people',
+  match_attribute: 'email',
+  records: [
+    { email: 'john@example.com', name: 'John Updated' },
+    { email: 'new@example.com', name: 'New Person' }
+  ]
+)
+```
+
+#### Rate Limiting
+
+```ruby
+# Initialize client with custom rate limiter
+limiter = Attio::RateLimiter.new(
+  max_requests: 100,
+  window_seconds: 60,
+  max_retries: 3
+)
+client.rate_limiter = limiter
+
+# Execute with rate limiting
+limiter.execute { client.records.list(object: 'people') }
+
+# Queue requests for later processing
+limiter.queue_request(priority: 1) { important_operation }
+limiter.queue_request(priority: 5) { less_important_operation }
+
+# Process queued requests
+results = limiter.process_queue(max_per_batch: 10)
+
+# Check rate limit status
+status = limiter.status
+puts "Remaining: #{status[:remaining]}/#{status[:limit]}"
+```
+
+#### Meta API
+
+```ruby
+# Identify current workspace and user
+info = client.meta.identify
+puts "Workspace: #{info['workspace']['name']}"
+puts "User: #{info['user']['email']}"
+
+# Validate API key
+validation = client.meta.validate_key
+puts "Valid: #{validation['valid']}"
+puts "Permissions: #{validation['permissions']}"
+
+# Get usage statistics
+usage = client.meta.usage_stats
+puts "Records: #{usage['records']['total']}"
+puts "API calls today: #{usage['api_calls']['today']}"
+```
+
 ### Error Handling
 
 The client will raise appropriate exceptions for different error conditions:
@@ -390,16 +521,28 @@ end
 
 This client supports all major Attio API endpoints:
 
-- ✅ Records (CRUD operations, querying with filters and sorting)
-- ✅ Objects (list, get schema)
-- ✅ Lists (list, get entries, manage list entries)
-- ✅ Workspaces (list, get current)
-- ✅ Attributes (list, create, update)
-- ✅ Users (list, get current user)
-- ✅ Comments (CRUD operations, reactions on records and threads)
-- ✅ Threads (CRUD operations, participant management, status control)
-- ✅ Tasks (CRUD operations, assignment, completion tracking)
-- ✅ Notes (CRUD operations on records)
+### Core Resources
+- ✅ **Records** - Full CRUD operations, querying with filters and sorting
+- ✅ **Objects** - List, get schema information
+- ✅ **Lists** - List, get entries, manage list entries
+- ✅ **Attributes** - List, create, update custom attributes
+- ✅ **Workspaces** - List, get current workspace
+- ✅ **Users** - List, get current user
+
+### Collaboration Features
+- ✅ **Comments** - CRUD operations, emoji reactions on records and threads
+- ✅ **Threads** - CRUD operations, participant management, status control
+- ✅ **Tasks** - CRUD operations, assignment, completion tracking
+- ✅ **Notes** - CRUD operations on records
+
+### Sales & CRM
+- ✅ **Deals** - Pipeline management, stage tracking, win/loss tracking
+- ✅ **Workspace Members** - Member management, invitations, permissions
+
+### Advanced Features
+- ✅ **Bulk Operations** - Batch create/update/delete with automatic batching
+- ✅ **Rate Limiting** - Intelligent retry with exponential backoff and request queuing
+- ✅ **Meta API** - Identify workspace, validate API keys, get usage stats
 
 ## Development
 

@@ -54,6 +54,16 @@ module Attio
         raise ArgumentError, "#{field_name} is required"
       end
 
+      # Validates that a hash parameter is present
+      # @param value [Hash] The hash to validate
+      # @param field_name [String] The field name for the error message
+      # @raise [ArgumentError] if value is nil or not a hash
+      private def validate_required_hash!(value, field_name)
+        return if value.is_a?(Hash)
+
+        raise ArgumentError, "#{field_name} is required"
+      end
+
       # Validates parent object and record ID together
       # @param parent_object [String] The parent object type
       # @param parent_record_id [String] The parent record ID
@@ -63,14 +73,14 @@ module Attio
         validate_required_string!(parent_record_id, "Parent record ID")
       end
 
-      private def request(method, path, params = {})
+      private def request(method, path, params = {}, _headers = {})
         connection = client.connection
 
         case method
         when :get
           handle_get_request(connection, path, params)
         when :post
-          connection.post(path, params)
+          handle_post_request(connection, path, params)
         when :patch
           connection.patch(path, params)
         when :put
@@ -84,6 +94,10 @@ module Attio
 
       private def handle_get_request(connection, path, params)
         params.empty? ? connection.get(path) : connection.get(path, params)
+      end
+
+      private def handle_post_request(connection, path, params)
+        params.empty? ? connection.post(path) : connection.post(path, params)
       end
 
       private def handle_delete_request(connection, path, params)

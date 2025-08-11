@@ -152,5 +152,55 @@ module Attio
     def threads
       @threads ||= Resources::Threads.new(self)
     end
+
+    # Access to the Workspace Members API resource.
+    #
+    # @return [Resources::WorkspaceMembers] Workspace Members resource instance
+    # @example
+    #   members = client.workspace_members.list
+    def workspace_members
+      @workspace_members ||= Resources::WorkspaceMembers.new(self)
+    end
+
+    # Access to the Deals API resource.
+    #
+    # @return [Resources::Deals] Deals resource instance
+    # @example
+    #   deals = client.deals.list
+    def deals
+      @deals ||= Resources::Deals.new(self)
+    end
+
+    # Access to the Meta API resource.
+    #
+    # @return [Resources::Meta] Meta resource instance
+    # @example
+    #   info = client.meta.identify
+    def meta
+      @meta ||= Resources::Meta.new(self)
+    end
+
+    # Access to the Bulk Operations API resource.
+    #
+    # @return [Resources::Bulk] Bulk operations resource instance
+    # @example
+    #   client.bulk.create_records(object: 'companies', records: [...])
+    def bulk
+      @bulk ||= Resources::Bulk.new(self)
+    end
+
+    # Get or set the rate limiter for this client.
+    #
+    # @param limiter [RateLimiter] Optional rate limiter to set
+    # @return [RateLimiter] The rate limiter instance
+    # @example
+    #   client.rate_limiter = Attio::RateLimiter.new(max_requests: 100)
+    def rate_limiter(limiter = nil)
+      if limiter
+        @rate_limiter = limiter
+      else
+        @rate_limiter ||= RateLimiter.new
+      end
+    end
   end
 end

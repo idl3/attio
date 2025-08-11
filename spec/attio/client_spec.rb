@@ -181,5 +181,71 @@ RSpec.describe Attio::Client do
         expect(threads1).to be(threads2)
       end
     end
+
+    describe "#workspace_members" do
+      it "returns a WorkspaceMembers resource" do
+        expect(client.workspace_members).to be_a(Attio::Resources::WorkspaceMembers)
+      end
+
+      it "memoizes the resource" do
+        workspace_members1 = client.workspace_members
+        workspace_members2 = client.workspace_members
+        expect(workspace_members1).to be(workspace_members2)
+      end
+    end
+
+    describe "#deals" do
+      it "returns a Deals resource" do
+        expect(client.deals).to be_a(Attio::Resources::Deals)
+      end
+
+      it "memoizes the resource" do
+        deals1 = client.deals
+        deals2 = client.deals
+        expect(deals1).to be(deals2)
+      end
+    end
+
+    describe "#meta" do
+      it "returns a Meta resource" do
+        expect(client.meta).to be_a(Attio::Resources::Meta)
+      end
+
+      it "memoizes the resource" do
+        meta1 = client.meta
+        meta2 = client.meta
+        expect(meta1).to be(meta2)
+      end
+    end
+
+    describe "#bulk" do
+      it "returns a Bulk resource" do
+        expect(client.bulk).to be_a(Attio::Resources::Bulk)
+      end
+
+      it "memoizes the resource" do
+        bulk1 = client.bulk
+        bulk2 = client.bulk
+        expect(bulk1).to be(bulk2)
+      end
+    end
+  end
+
+  describe "#rate_limiter" do
+    it "returns a default RateLimiter if not set" do
+      expect(client.rate_limiter).to be_a(Attio::RateLimiter)
+    end
+
+    it "allows setting a custom rate limiter" do
+      custom_limiter = Attio::RateLimiter.new(max_requests: 50)
+      client.rate_limiter(custom_limiter)
+      expect(client.rate_limiter).to be(custom_limiter)
+    end
+
+    it "memoizes the default rate limiter" do
+      limiter1 = client.rate_limiter
+      limiter2 = client.rate_limiter
+      expect(limiter1).to be(limiter2)
+    end
   end
 end
