@@ -196,7 +196,7 @@ module Attio
         raise ArgumentError, "Records array is required for bulk #{operation}" if records.nil?
         raise ArgumentError, "Records must be an array for bulk #{operation}" unless records.is_a?(Array)
         raise ArgumentError, "Records array cannot be empty for bulk #{operation}" if records.empty?
-        raise ArgumentError, "Too many records (max #{MAX_BATCH_SIZE * 10})" if records.size > MAX_BATCH_SIZE * 10
+        raise ArgumentError, "Too many records (max 1000)" if records.size > MAX_BATCH_SIZE * 10
 
         records.each_with_index do |record, index|
           raise ArgumentError, "Record at index #{index} must be a hash" unless record.is_a?(Hash)

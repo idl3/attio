@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    attio (0.2.0)
+    attio (0.3.0)
       typhoeus (~> 1.4)
 
 GEM
