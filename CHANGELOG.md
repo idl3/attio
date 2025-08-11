@@ -7,7 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.1.2] - 2025-08-11
+## [0.1.3] - 2025-08-11
+
+### Fixed
+- Ruby 3.0 and 3.1 compatibility by using bundler 2.4.22
+- All CI workflows now explicitly specify compatible bundler version
+
+## [0.1.2] - 2025-08-11 (yanked)
 
 ### Added
 - Ruby 3.4 support in CI/CD pipelines
