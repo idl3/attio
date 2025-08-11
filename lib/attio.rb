@@ -7,6 +7,7 @@ require "attio/errors"
 require "attio/http_client"
 require "attio/client"
 
+# Resources
 require "attio/resources/base"
 require "attio/resources/records"
 require "attio/resources/objects"
@@ -22,7 +23,14 @@ require "attio/resources/workspace_members"
 require "attio/resources/deals"
 require "attio/resources/meta"
 require "attio/resources/bulk"
+
+# Enterprise features
 require "attio/rate_limiter"
+require "attio/webhooks"
+require "attio/connection_pool"
+require "attio/circuit_breaker"
+require "attio/observability"
+require "attio/enhanced_client"
 
 # The main Attio module provides access to the Attio API client.
 #
