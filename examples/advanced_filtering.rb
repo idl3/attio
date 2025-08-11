@@ -24,7 +24,7 @@ people_from_domain = client.records.list(
   },
   limit: 10
 )
-puts "   Found #{people_from_domain.dig('data')&.length || 0} people from example.com"
+puts "   Found #{people_from_domain['data']&.length || 0} people from example.com"
 
 # 2. Query with multiple filters (AND condition)
 puts "\n2. Finding high-value companies in technology sector..."
@@ -39,7 +39,7 @@ high_value_tech = client.records.list(
   ],
   limit: 5
 )
-puts "   Found #{high_value_tech.dig('data')&.length || 0} high-value tech companies"
+puts "   Found #{high_value_tech['data']&.length || 0} high-value tech companies"
 
 # 3. Query with date range filters
 puts "\n3. Finding recently created records..."
@@ -53,7 +53,7 @@ recent_records = client.records.list(
     { field: "created_at", direction: "desc" },
   ]
 )
-puts "   Found #{recent_records.dig('data')&.length || 0} people created in last 30 days"
+puts "   Found #{recent_records['data']&.length || 0} people created in last 30 days"
 
 # 4. Query with relationship filters
 puts "\n4. Finding people associated with specific companies..."
@@ -71,7 +71,7 @@ if companies.dig("data", 0)
       },
     }
   )
-  puts "   Found #{people_at_company.dig('data')&.length || 0} people at the company"
+  puts "   Found #{people_at_company['data']&.length || 0} people at the company"
 else
   puts "   No companies found for demo"
 end
@@ -85,7 +85,7 @@ missing_email = client.records.list(
   },
   limit: 10
 )
-puts "   Found #{missing_email.dig('data')&.length || 0} people without email addresses"
+puts "   Found #{missing_email['data']&.length || 0} people without email addresses"
 
 # 6. Complex sorting with multiple fields
 puts "\n6. Sorting by multiple criteria..."
@@ -98,7 +98,7 @@ sorted_companies = client.records.list(
   ],
   limit: 20
 )
-puts "   Retrieved #{sorted_companies.dig('data')&.length || 0} companies sorted by industry, revenue, and name"
+puts "   Retrieved #{sorted_companies['data']&.length || 0} companies sorted by industry, revenue, and name"
 
 # 7. Pagination example
 puts "\n7. Paginating through results..."
@@ -114,7 +114,7 @@ cursor = nil
   params[:cursor] = cursor if cursor
 
   page_results = client.records.list(**params)
-  fetched = page_results.dig("data")&.length || 0
+  fetched = page_results["data"]&.length || 0
   total_fetched += fetched
 
   puts "   Page #{page + 1}: fetched #{fetched} records"
@@ -130,7 +130,7 @@ pending_tasks = client.tasks.list(
   status: "pending",
   limit: 10
 )
-puts "   Found #{pending_tasks.dig('data')&.length || 0} pending tasks"
+puts "   Found #{pending_tasks['data']&.length || 0} pending tasks"
 
 # 9. Query with custom field filters
 puts "\n9. Filtering by custom fields..."
@@ -165,7 +165,7 @@ if export_data["data"] && !export_data["data"].empty?
   end
 end
 
-puts "\n" + ("=" * 40)
+puts "\n#{'=' * 40}"
 puts "Example completed successfully!"
 puts "\nThis example demonstrated:"
 puts "  • Simple and complex filtering"

@@ -127,22 +127,22 @@ threads = client.threads.list(
   parent_object: "companies",
   parent_record_id: company_id
 )
-puts "   Threads on company: #{threads.dig('data')&.length || 0}"
+puts "   Threads on company: #{threads['data']&.length || 0}"
 
 # List comments in thread
 comments = client.comments.list(thread_id: thread_id)
-puts "   Comments in thread: #{comments.dig('data')&.length || 0}"
+puts "   Comments in thread: #{comments['data']&.length || 0}"
 
 # List tasks
 all_tasks = client.tasks.list
-puts "   Total tasks: #{all_tasks.dig('data')&.length || 0}"
+puts "   Total tasks: #{all_tasks['data']&.length || 0}"
 
 # List notes
 notes = client.notes.list(
   parent_object: "companies",
   parent_record_id: company_id
 )
-puts "   Notes on company: #{notes.dig('data')&.length || 0}"
+puts "   Notes on company: #{notes['data']&.length || 0}"
 
 # 8. Update task status
 puts "\n8. Updating task status..."
@@ -157,7 +157,7 @@ puts "\n9. Closing the discussion thread..."
 client.threads.close(id: thread_id)
 puts "   ✓ Thread closed"
 
-puts "\n" + ("=" * 40)
+puts "\n#{'=' * 40}"
 puts "Example completed successfully!"
 puts "\nThis example demonstrated:"
 puts "  • Creating and managing discussion threads"

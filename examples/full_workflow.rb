@@ -136,7 +136,7 @@ if lists && lists["data"] && !lists["data"].empty?
     client.lists.entries(id: list_id, limit: 5)
   end
 
-  puts "   List has #{entries.dig('data')&.length || 0} entries" if entries
+  puts "   List has #{entries['data']&.length || 0} entries" if entries
 end
 
 # 5. Collaboration workflow
@@ -235,9 +235,9 @@ tasks = safe_execute("Getting pending tasks") do
 end
 
 if tasks
-  puts "   Pending tasks: #{tasks.dig('data')&.length || 0}"
+  puts "   Pending tasks: #{tasks['data']&.length || 0}"
   tasks["data"]&.each do |task|
-    puts "   - #{task.dig('title')}"
+    puts "   - #{task['title']}"
   end
 end
 
@@ -250,7 +250,7 @@ recent_companies = safe_execute("Finding recent companies") do
   )
 end
 
-puts "   Recent companies: #{recent_companies.dig('data')&.length || 0}" if recent_companies
+puts "   Recent companies: #{recent_companies['data']&.length || 0}" if recent_companies
 
 # 7. User management
 puts "\n7. User Information"
@@ -271,7 +271,7 @@ users = safe_execute("Listing workspace users") do
   client.users.list
 end
 
-puts "   Total users: #{users.dig('data')&.length || 0}" if users
+puts "   Total users: #{users['data']&.length || 0}" if users
 
 # 8. Advanced features
 puts "\n8. Advanced Features"
@@ -283,7 +283,7 @@ if company_id
     client.attributes.list(object: "companies")
   end
 
-  puts "   Company attributes: #{attributes.dig('data')&.length || 0}" if attributes
+  puts "   Company attributes: #{attributes['data']&.length || 0}" if attributes
 end
 
 # Demonstrate pagination
@@ -322,7 +322,7 @@ puts "   ✓ Tasks and notes created"
 puts "   ✓ Queries executed"
 puts "   ✓ User information retrieved"
 
-puts "\n" + ("=" * 40)
+puts "\n#{'=' * 40}"
 puts "Complete workflow example finished!"
 puts "\nThis example demonstrated:"
 puts "  • Complete CRM setup"
