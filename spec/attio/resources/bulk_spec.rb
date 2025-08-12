@@ -148,6 +148,20 @@ RSpec.describe Attio::Resources::Bulk do
       expect { bulk.update_records(object: "people", updates: []) }
         .to raise_error(ArgumentError, "Updates array cannot be empty for bulk update")
     end
+    
+    it "raises error when too many updates are provided" do
+      # Create 1001 updates (over the max of 1000)
+      updates = Array.new(1001) do |i|
+        {
+          id: "person_#{i}",
+          data: { email: "user#{i}@example.com", name: "User #{i}" }
+        }
+      end
+      
+      expect do
+        bulk.update_records(object: "people", updates: updates)
+      end.to raise_error(ArgumentError, /Too many updates \(max 1000\)/)
+    end
   end
 
   describe "#delete_records" do

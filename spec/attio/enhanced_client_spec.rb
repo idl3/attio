@@ -59,6 +59,37 @@ RSpec.describe Attio::EnhancedClient do
         expect(instrumentation).to be_a(Attio::Observability::Instrumentation)
       end
     end
+    
+    context "with instrumentation and connection pool" do
+      let(:logger) { Logger.new(StringIO.new) }
+      let(:client) do
+        described_class.new(
+          api_key: api_key,
+          connection_pool: { size: 2 },
+          instrumentation: { logger: logger, metrics: :memory }
+        )
+      end
+      
+      it "starts background thread to report pool stats" do
+        # Mock the sleep to return immediately so we can test the stats recording
+        allow_any_instance_of(Object).to receive(:sleep).and_call_original
+        allow_any_instance_of(Object).to receive(:sleep).with(60).and_return(nil)
+        
+        # Expect the instrumentation to record pool stats
+        instrumentation = client.instance_variable_get(:@instrumentation)
+        pool = client.instance_variable_get(:@pool)
+        
+        expect(instrumentation).to receive(:record_pool_stats).with(pool.stats).at_least(:once)
+        
+        # Give the thread time to start and execute
+        sleep 0.1
+        
+        # Find and clean up the background thread
+        threads = Thread.list.select { |t| t.alive? && t != Thread.main }
+        background_thread = threads.find { |t| t != Thread.current }
+        background_thread.kill if background_thread
+      end
+    end
 
     context "with webhooks" do
       let(:client) do
@@ -90,13 +121,6 @@ RSpec.describe Attio::EnhancedClient do
         expect(client.instance_variable_get(:@circuit_breaker)).to be_a(Attio::CircuitBreaker)
         expect(client.instance_variable_get(:@instrumentation)).to be_a(Attio::Observability::Instrumentation)
         expect(client.instance_variable_get(:@webhooks)).to be_a(Attio::Webhooks)
-      end
-
-      it "starts background stats reporter thread" do
-        # Give the thread time to start
-        sleep 0.1
-        threads = Thread.list.select { |t| t.alive? && t != Thread.main }
-        expect(threads.size).to be >= 1
       end
     end
   end
@@ -291,6 +315,13 @@ RSpec.describe Attio::EnhancedClient do
       # Force pool creation by using the connection
       pool = client.instance_variable_get(:@pool)
       expect(pool).to be_a(Attio::ConnectionPool)
+      
+      # Use the pool to get a connection and verify it's the right type
+      pool.with do |http_client|
+        expect(http_client).to be_a(http_client_class)
+        expect(http_client.instance_variable_get(:@base_url)).to eq("https://api.attio.com/v2")
+        expect(http_client.instance_variable_get(:@timeout)).to eq(30)
+      end
     end
   end
 

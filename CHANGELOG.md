@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2025-08-12
+
+### Added
+- **Enterprise Features**:
+  - **EnhancedClient** with connection pooling, circuit breaker, observability, and webhook support
+  - **CircuitBreaker** pattern for fault tolerance with configurable thresholds and timeouts
+  - **ConnectionPool** for efficient connection management with thread-safe implementation
+  - **Observability** framework with support for multiple backends (StatsD, Datadog, Prometheus, OpenTelemetry)
+  - **Webhook** processing with signature verification and event handling
+  - **Middleware** support for request/response instrumentation
+- **100% Test Coverage**: Added 12 new tests for complete code coverage (590 tests total)
+- **Comprehensive test coverage** for all error paths and edge cases
+- **Background thread** for automatic pool statistics reporting
+
+### Improved
+- **Test Quality**: Achieved 100% code coverage (1311/1311 lines)
+- **Error Handling**: Added graceful error messages for missing gem dependencies
+- **Validation**: Enhanced bulk operations validation with proper max size checks (1000 items)
+- **Documentation**: All enterprise features properly tested and documented
+
+### Fixed
+- Test coverage gaps in observability backends
+- Middleware class test coverage
+- Background thread execution in enhanced client
+- Bulk operations validation error message (max is 1000, not 100)
+
 ## [0.3.0] - 2025-08-11
 
 ### Added

@@ -280,6 +280,12 @@ end
 
 RSpec.describe "Attio::Observability factories" do
   describe "Metrics.for" do
+    it "raises helpful error when statsd-ruby gem is not available" do
+      allow_any_instance_of(Attio::Observability::Metrics::StatsD).to receive(:require).with("statsd-ruby").and_raise(LoadError)
+      
+      expect { Attio::Observability::Metrics.for(:statsd) }.to raise_error(RuntimeError, /Please add 'statsd-ruby' to your Gemfile/)
+    end
+    
     it "creates StatsD backend when gem is available" do
       # Mock the gem
       statsd_class = Class.new do
@@ -289,11 +295,18 @@ RSpec.describe "Attio::Observability factories" do
         def histogram(metric, value, tags: nil); end
       end
       stub_const("::Statsd", statsd_class)
+      allow_any_instance_of(Attio::Observability::Metrics::StatsD).to receive(:require).with("statsd-ruby").and_return(true)
       
       backend = Attio::Observability::Metrics.for(:statsd)
       expect(backend).to be_a(Attio::Observability::Metrics::StatsD)
     end
 
+    it "raises helpful error when dogstatsd-ruby gem is not available" do
+      allow_any_instance_of(Attio::Observability::Metrics::Datadog).to receive(:require).with("datadog/statsd").and_raise(LoadError)
+      
+      expect { Attio::Observability::Metrics.for(:datadog) }.to raise_error(RuntimeError, /Please add 'dogstatsd-ruby' to your Gemfile/)
+    end
+    
     it "creates Datadog backend when gem is available" do
       # Mock the gem
       datadog_module = Module.new
@@ -305,23 +318,38 @@ RSpec.describe "Attio::Observability factories" do
       end
       stub_const("::Datadog", datadog_module)
       stub_const("::Datadog::Statsd", statsd_class)
+      allow_any_instance_of(Attio::Observability::Metrics::Datadog).to receive(:require).with("datadog/statsd").and_return(true)
       
       backend = Attio::Observability::Metrics.for(:datadog)
       expect(backend).to be_a(Attio::Observability::Metrics::Datadog)
     end
 
+    it "raises helpful error when prometheus-client gem is not available" do
+      allow_any_instance_of(Attio::Observability::Metrics::Prometheus).to receive(:require).with("prometheus/client").and_raise(LoadError)
+      
+      expect { Attio::Observability::Metrics.for(:prometheus) }.to raise_error(RuntimeError, /Please add 'prometheus-client' to your Gemfile/)
+    end
+    
     it "creates Prometheus backend when gem is available" do
       # Mock the gem
       prometheus_module = Module.new
-      client_module = Module.new
+      client_module = Module.new do
+        def self.registry
+          # registry will be set by test
+        end
+      end
+      counter_double = double("counter", increment: nil)
+      gauge_double = double("gauge", set: nil)
+      histogram_double = double("histogram", observe: nil)
       registry = Class.new do
-        def counter(name, docstring:, labels: []); double("counter", increment: nil); end
-        def gauge(name, docstring:, labels: []); double("gauge", set: nil); end
-        def histogram(name, docstring:, labels: []); double("histogram", observe: nil); end
+        define_method(:counter) { |name, docstring:, labels: []| counter_double }
+        define_method(:gauge) { |name, docstring:, labels: []| gauge_double }
+        define_method(:histogram) { |name, docstring:, labels: []| histogram_double }
       end
       stub_const("::Prometheus", prometheus_module)
       stub_const("::Prometheus::Client", client_module)
       allow(client_module).to receive(:registry).and_return(registry.new)
+      allow_any_instance_of(Attio::Observability::Metrics::Prometheus).to receive(:require).with("prometheus/client").and_return(true)
       
       backend = Attio::Observability::Metrics.for(:prometheus)
       expect(backend).to be_a(Attio::Observability::Metrics::Prometheus)
@@ -333,32 +361,51 @@ RSpec.describe "Attio::Observability factories" do
     end
 
     it "raises for unknown backend" do
-      expect { Attio::Observability::Metrics.for(:unknown) }.to raise_error(ArgumentError, /Unknown metric backend/)
+      expect { Attio::Observability::Metrics.for(:unknown) }.to raise_error(ArgumentError, /Unknown metrics backend/)
     end
   end
 
   describe "Traces.for" do
+    it "raises helpful error when opentelemetry-sdk gem is not available" do
+      allow_any_instance_of(Attio::Observability::Traces::OpenTelemetry).to receive(:require).with("opentelemetry-sdk").and_raise(LoadError)
+      
+      expect { Attio::Observability::Traces.for(:opentelemetry) }.to raise_error(RuntimeError, /Please add 'opentelemetry-sdk' to your Gemfile/)
+    end
+    
     it "creates OpenTelemetry backend when gem is available" do
       # Mock the gem
-      opentelemetry_module = Module.new
+      opentelemetry_module = Module.new do
+        def self.tracer_provider
+          # provider will be set by test
+        end
+      end
       tracer_provider = double("provider", tracer: double("tracer", in_span: nil))
       stub_const("::OpenTelemetry", opentelemetry_module)
       allow(opentelemetry_module).to receive(:tracer_provider).and_return(tracer_provider)
+      allow_any_instance_of(Attio::Observability::Traces::OpenTelemetry).to receive(:require).with("opentelemetry-sdk").and_return(true)
       
       backend = Attio::Observability::Traces.for(:opentelemetry)
       expect(backend).to be_a(Attio::Observability::Traces::OpenTelemetry)
     end
 
+    it "raises helpful error when datadog gem is not available" do
+      allow_any_instance_of(Attio::Observability::Traces::DatadogAPM).to receive(:require).with("datadog").and_raise(LoadError)
+      
+      expect { Attio::Observability::Traces.for(:datadog) }.to raise_error(RuntimeError, /Please add 'datadog' to your Gemfile/)
+    end
+    
     it "creates DatadogAPM backend when gem is available" do
       # Mock the gem
       datadog_module = Module.new
+      span_double = double("span")
       tracing_module = Module.new do
-        def self.trace(name)
-          yield(double("span")) if block_given?
+        define_singleton_method(:trace) do |name, &block|
+          block.call(span_double) if block
         end
       end
       stub_const("::Datadog", datadog_module)
       stub_const("::Datadog::Tracing", tracing_module)
+      allow_any_instance_of(Attio::Observability::Traces::DatadogAPM).to receive(:require).with("datadog").and_return(true)
       
       backend = Attio::Observability::Traces.for(:datadog)
       expect(backend).to be_a(Attio::Observability::Traces::DatadogAPM)
@@ -386,6 +433,7 @@ RSpec.describe "Attio::Observability backend implementations" do
         def histogram(metric, value, tags: nil); end
       end
       stub_const("::Statsd", statsd_class)
+      allow_any_instance_of(Attio::Observability::Metrics::StatsD).to receive(:require).with("statsd-ruby").and_return(true)
     end
 
     it "creates client and calls methods" do
@@ -407,6 +455,7 @@ RSpec.describe "Attio::Observability backend implementations" do
       end
       stub_const("::Datadog", datadog_module)
       stub_const("::Datadog::Statsd", statsd_class)
+      allow_any_instance_of(Attio::Observability::Metrics::Datadog).to receive(:require).with("datadog/statsd").and_return(true)
     end
 
     it "creates client and calls methods" do
@@ -420,15 +469,23 @@ RSpec.describe "Attio::Observability backend implementations" do
   describe "Prometheus" do
     before do
       prometheus_module = Module.new
-      client_module = Module.new
+      client_module = Module.new do
+        def self.registry
+          # registry will be set by test
+        end
+      end
+      counter_double = double("counter", increment: nil)
+      gauge_double = double("gauge", set: nil)
+      histogram_double = double("histogram", observe: nil)
       registry = Class.new do
-        def counter(name, docstring:, labels: []); double("counter", increment: nil); end
-        def gauge(name, docstring:, labels: []); double("gauge", set: nil); end
-        def histogram(name, docstring:, labels: []); double("histogram", observe: nil); end
+        define_method(:counter) { |name, docstring:, labels: []| counter_double }
+        define_method(:gauge) { |name, docstring:, labels: []| gauge_double }
+        define_method(:histogram) { |name, docstring:, labels: []| histogram_double }
       end
       stub_const("::Prometheus", prometheus_module)
       stub_const("::Prometheus::Client", client_module)
       allow(client_module).to receive(:registry).and_return(registry.new)
+      allow_any_instance_of(Attio::Observability::Metrics::Prometheus).to receive(:require).with("prometheus/client").and_return(true)
     end
 
     it "creates client and calls methods" do
@@ -441,10 +498,15 @@ RSpec.describe "Attio::Observability backend implementations" do
 
   describe "OpenTelemetry" do
     before do
-      opentelemetry_module = Module.new
+      opentelemetry_module = Module.new do
+        def self.tracer_provider
+          # provider will be set by test
+        end
+      end
       tracer_provider = double("provider", tracer: double("tracer", in_span: nil))
       stub_const("::OpenTelemetry", opentelemetry_module)
       allow(opentelemetry_module).to receive(:tracer_provider).and_return(tracer_provider)
+      allow_any_instance_of(Attio::Observability::Traces::OpenTelemetry).to receive(:require).with("opentelemetry-sdk").and_return(true)
     end
 
     it "creates tracer and spans" do
@@ -456,18 +518,88 @@ RSpec.describe "Attio::Observability backend implementations" do
   describe "DatadogAPM" do
     before do
       datadog_module = Module.new
+      span_double = double("span")
       tracing_module = Module.new do
-        def self.trace(name)
-          yield(double("span")) if block_given?
+        define_singleton_method(:trace) do |name, &block|
+          block.call(span_double) if block
         end
       end
       stub_const("::Datadog", datadog_module)
       stub_const("::Datadog::Tracing", tracing_module)
+      allow_any_instance_of(Attio::Observability::Traces::DatadogAPM).to receive(:require).with("datadog").and_return(true)
     end
 
     it "creates tracer and spans" do
       backend = Attio::Observability::Traces::DatadogAPM.new
       expect { backend.span("test") { |span| span } }.not_to raise_error
+    end
+  end
+end
+
+RSpec.describe Attio::Observability::Middleware do
+  let(:app) { double("app") }
+  let(:instrumentation) { instance_double(Attio::Observability::Instrumentation) }
+  let(:middleware) { described_class.new(app, instrumentation) }
+  let(:env) do
+    {
+      method: :get,
+      url: double("url", path: "/api/records")
+    }
+  end
+
+  describe "#call" do
+    context "when request succeeds" do
+      let(:response) { double("response", status: 200) }
+
+      before do
+        allow(app).to receive(:call).with(env).and_return(response)
+      end
+
+      it "calls the app" do
+        allow(instrumentation).to receive(:record_api_call)
+        expect(app).to receive(:call).with(env)
+        middleware.call(env)
+      end
+
+      it "records successful API call" do
+        expect(instrumentation).to receive(:record_api_call).with(
+          hash_including(
+            method: :get,
+            path: "/api/records",
+            status: 200
+          )
+        )
+        middleware.call(env)
+      end
+
+      it "returns the response" do
+        allow(instrumentation).to receive(:record_api_call)
+        expect(middleware.call(env)).to eq(response)
+      end
+    end
+
+    context "when request fails" do
+      let(:error) { StandardError.new("Connection failed") }
+
+      before do
+        allow(app).to receive(:call).with(env).and_raise(error)
+      end
+
+      it "records API call with error" do
+        expect(instrumentation).to receive(:record_api_call).with(
+          hash_including(
+            method: :get,
+            path: "/api/records",
+            error: error
+          )
+        )
+        expect { middleware.call(env) }.to raise_error(StandardError)
+      end
+
+      it "re-raises the error" do
+        allow(instrumentation).to receive(:record_api_call)
+        expect { middleware.call(env) }.to raise_error(error)
+      end
     end
   end
 end

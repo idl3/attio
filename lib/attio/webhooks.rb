@@ -175,15 +175,16 @@ module Attio
     attr_reader :port, :webhooks, :events
 
     def initialize(port: 3001, secret: "test_secret")
+      @port = port
+      @webhooks = Webhooks.new(secret: secret)
+      @events = []
+      @server = nil
+
       begin
         require "webrick"
       rescue LoadError
         raise "Please add 'webrick' to your Gemfile to use WebhookServer"
       end
-      @port = port
-      @webhooks = Webhooks.new(secret: secret)
-      @events = []
-      @server = nil
     end
 
     def start

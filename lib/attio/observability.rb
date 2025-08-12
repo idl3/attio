@@ -220,12 +220,10 @@ module Attio
       # StatsD metrics
       class StatsD
         def initialize
-          begin
-            require "statsd-ruby"
-          rescue LoadError
-            raise "Please add 'statsd-ruby' to your Gemfile"
-          end
+          require "statsd-ruby"
           @client = ::Statsd.new("localhost", 8125)
+        rescue LoadError
+          raise "Please add 'statsd-ruby' to your Gemfile"
         end
 
         def increment(metric, tags: {})
@@ -248,12 +246,10 @@ module Attio
       # Datadog metrics
       class Datadog
         def initialize
-          begin
-            require "datadog/statsd"
-          rescue LoadError
-            raise "Please add 'dogstatsd-ruby' to your Gemfile"
-          end
+          require "datadog/statsd"
           @client = ::Datadog::Statsd.new("localhost", 8125)
+        rescue LoadError
+          raise "Please add 'dogstatsd-ruby' to your Gemfile"
         end
 
         def increment(metric, tags: {})
@@ -276,15 +272,13 @@ module Attio
       # Prometheus metrics
       class Prometheus
         def initialize
-          begin
-            require "prometheus/client"
-          rescue LoadError
-            raise "Please add 'prometheus-client' to your Gemfile"
-          end
+          require "prometheus/client"
           @registry = ::Prometheus::Client.registry
           @counters = {}
           @gauges = {}
           @histograms = {}
+        rescue LoadError
+          raise "Please add 'prometheus-client' to your Gemfile"
         end
 
         def increment(metric, tags: {})
@@ -331,12 +325,10 @@ module Attio
       # OpenTelemetry tracing
       class OpenTelemetry
         def initialize
-          begin
-            require "opentelemetry-sdk"
-          rescue LoadError
-            raise "Please add 'opentelemetry-sdk' to your Gemfile"
-          end
+          require "opentelemetry-sdk"
           @tracer = ::OpenTelemetry.tracer_provider.tracer("attio-ruby")
+        rescue LoadError
+          raise "Please add 'opentelemetry-sdk' to your Gemfile"
         end
 
         def span(name, &block)
@@ -347,12 +339,10 @@ module Attio
       # Datadog APM tracing
       class DatadogAPM
         def initialize
-          begin
-            require "datadog"
-          rescue LoadError
-            raise "Please add 'datadog' to your Gemfile"
-          end
+          require "datadog"
           @tracer = ::Datadog::Tracing
+        rescue LoadError
+          raise "Please add 'datadog' to your Gemfile"
         end
 
         def span(name)
