@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **Custom Objects Support**: Full create and update operations for custom objects
+  - Create custom objects with `client.objects.create(api_slug:, singular_noun:, plural_noun:)`
+  - Update custom objects with `client.objects.update(id_or_slug:, ...)`
+  - Proper validation and error handling for all operations
+  - Comprehensive test coverage with 21 new test cases
+
 ## [0.4.0] - 2025-01-12
 
 ### Breaking Changes

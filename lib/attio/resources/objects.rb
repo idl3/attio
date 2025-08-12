@@ -9,14 +9,97 @@ module Attio
     #
     # @example Listing all objects
     #   client.objects.list
+    #
+    # @example Creating a custom object
+    #   client.objects.create(
+    #     api_slug: "projects",
+    #     singular_noun: "Project",
+    #     plural_noun: "Projects"
+    #   )
+    #
+    # @example Updating a custom object
+    #   client.objects.update(
+    #     id_or_slug: "projects",
+    #     plural_noun: "Active Projects"
+    #   )
     class Objects < Base
+      # List all objects in the workspace
+      #
+      # @param params [Hash] Optional query parameters
+      # @return [Hash] List of objects
       def list(**params)
         request(:get, "objects", params)
       end
 
+      # Get a single object by ID or slug
+      #
+      # @param id_or_slug [String] The object ID or slug
+      # @return [Hash] The object details
       def get(id_or_slug:)
         validate_id_or_slug!(id_or_slug)
         request(:get, "objects/#{id_or_slug}")
+      end
+
+      # Create a new custom object
+      #
+      # @param api_slug [String] Unique slug for the object (snake_case)
+      # @param singular_noun [String] Singular name of the object
+      # @param plural_noun [String] Plural name of the object
+      # @return [Hash] The created object with ID and timestamps
+      # @raise [ArgumentError] if required parameters are missing
+      # @example
+      #   object = client.objects.create(
+      #     api_slug: "projects",
+      #     singular_noun: "Project",
+      #     plural_noun: "Projects"
+      #   )
+      def create(api_slug:, singular_noun:, plural_noun:)
+        validate_required_string!(api_slug, "API slug")
+        validate_required_string!(singular_noun, "Singular noun")
+        validate_required_string!(plural_noun, "Plural noun")
+
+        data = {
+          api_slug: api_slug,
+          singular_noun: singular_noun,
+          plural_noun: plural_noun
+        }
+
+        request(:post, "objects", { data: data })
+      end
+
+      # Update an existing custom object
+      #
+      # @param id_or_slug [String] The object ID or slug to update
+      # @param api_slug [String, nil] New API slug (optional)
+      # @param singular_noun [String, nil] New singular noun (optional)
+      # @param plural_noun [String, nil] New plural noun (optional)
+      # @return [Hash] The updated object
+      # @raise [ArgumentError] if no update fields are provided
+      # @example Update just the plural noun
+      #   client.objects.update(
+      #     id_or_slug: "projects",
+      #     plural_noun: "Active Projects"
+      #   )
+      # @example Update multiple fields
+      #   client.objects.update(
+      #     id_or_slug: "old_slug",
+      #     api_slug: "new_slug",
+      #     singular_noun: "New Name",
+      #     plural_noun: "New Names"
+      #   )
+      def update(id_or_slug:, api_slug: nil, singular_noun: nil, plural_noun: nil)
+        validate_id_or_slug!(id_or_slug)
+
+        data = {}
+        data[:api_slug] = api_slug if api_slug
+        data[:singular_noun] = singular_noun if singular_noun
+        data[:plural_noun] = plural_noun if plural_noun
+
+        if data.empty?
+          raise ArgumentError, "At least one field to update is required"
+        end
+
+        request(:patch, "objects/#{id_or_slug}", { data: data })
       end
 
       private def validate_id_or_slug!(id_or_slug)

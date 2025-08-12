@@ -1,10 +1,10 @@
 # Attio Ruby Client
 
 [![Tests](https://github.com/idl3/attio/actions/workflows/tests.yml/badge.svg)](https://github.com/idl3/attio/actions/workflows/tests.yml)
-[![Test Coverage](https://img.shields.io/badge/coverage-99.85%25-brightgreen.svg)](https://github.com/idl3/attio/tree/master/spec)
+[![Test Coverage](https://img.shields.io/badge/coverage-99.86%25-brightgreen.svg)](https://github.com/idl3/attio/tree/master/spec)
 [![Documentation](https://img.shields.io/badge/docs-yard-blue.svg)](https://idl3.github.io/attio)
 [![Gem Version](https://badge.fury.io/rb/attio.svg)](https://badge.fury.io/rb/attio)
-[![RSpec](https://img.shields.io/badge/RSpec-638_tests-green.svg)](https://github.com/idl3/attio/tree/master/spec)
+[![RSpec](https://img.shields.io/badge/RSpec-651_tests-green.svg)](https://github.com/idl3/attio/tree/master/spec)
 
 Ruby client for the [Attio CRM API](https://developers.attio.com/). This library provides easy access to the Attio API, allowing you to manage records, objects, lists, and more.
 
@@ -303,14 +303,35 @@ client.notes.update(
 client.notes.delete(id: 'note-123')
 ```
 
-#### Objects
+#### Objects (including Custom Objects)
 
 ```ruby
 # List all object types
 objects = client.objects.list
 
 # Get a specific object schema
-people_object = client.objects.get(id: 'people')
+people_object = client.objects.get(id_or_slug: 'people')
+
+# Create a custom object
+custom_object = client.objects.create(
+  api_slug: 'projects',
+  singular_noun: 'Project',
+  plural_noun: 'Projects'
+)
+
+# Update a custom object
+client.objects.update(
+  id_or_slug: 'projects',
+  plural_noun: 'Active Projects'
+)
+
+# Update multiple fields
+client.objects.update(
+  id_or_slug: 'projects',
+  api_slug: 'active_projects',
+  singular_noun: 'Active Project',
+  plural_noun: 'Active Projects'
+)
 ```
 
 #### Lists
@@ -709,7 +730,7 @@ This client supports all major Attio API endpoints:
 
 ### Core Resources
 - ✅ **Records** - Full CRUD operations, querying with filters and sorting
-- ✅ **Objects** - List, get schema information
+- ✅ **Objects** - List, get, create and update custom objects
 - ✅ **Lists** - List, get entries, manage list entries
 - ✅ **Attributes** - List, create, update custom attributes
 - ✅ **Workspaces** - List, get current workspace
@@ -774,8 +795,8 @@ open coverage/index.html
 ```
 
 Current stats:
-- **Test Coverage**: 99.85% (1373/1375 lines)
-- **Test Count**: 638 tests
+- **Test Coverage**: 99.86% (1388/1390 lines)
+- **Test Count**: 651 tests
 - **RuboCop**: 0 violations
 
 
