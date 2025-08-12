@@ -21,7 +21,6 @@ require "attio/resources/comments"
 require "attio/resources/threads"
 require "attio/resources/workspace_members"
 require "attio/resources/deals"
-require "attio/resources/meta"
 require "attio/resources/bulk"
 
 # Enterprise features

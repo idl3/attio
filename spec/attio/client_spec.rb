@@ -206,18 +206,6 @@ RSpec.describe Attio::Client do
       end
     end
 
-    describe "#meta" do
-      it "returns a Meta resource" do
-        expect(client.meta).to be_a(Attio::Resources::Meta)
-      end
-
-      it "memoizes the resource" do
-        meta1 = client.meta
-        meta2 = client.meta
-        expect(meta1).to be(meta2)
-      end
-    end
-
     describe "#bulk" do
       it "returns a Bulk resource" do
         expect(client.bulk).to be_a(Attio::Resources::Bulk)

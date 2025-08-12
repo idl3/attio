@@ -59,7 +59,8 @@ module Attio
           "Content-Type" => "application/json",
           "User-Agent" => "Attio Ruby Client/#{VERSION}",
         },
-        timeout: timeout
+        timeout: timeout,
+        rate_limiter: rate_limiter
       )
     end
 
@@ -169,15 +170,6 @@ module Attio
     #   deals = client.deals.list
     def deals
       @deals ||= Resources::Deals.new(self)
-    end
-
-    # Access to the Meta API resource.
-    #
-    # @return [Resources::Meta] Meta resource instance
-    # @example
-    #   info = client.meta.identify
-    def meta
-      @meta ||= Resources::Meta.new(self)
     end
 
     # Access to the Bulk Operations API resource.
