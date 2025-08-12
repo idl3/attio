@@ -6,15 +6,23 @@ This document contains important guidelines for Claude (or any AI assistant) whe
 
 **IMPORTANT**: Before creating any release tag or pushing to master, ALWAYS complete this checklist:
 
-### 1. Code Quality
+### 1. Documentation Updates (CRITICAL - DO THIS FIRST!)
+- [ ] Update "Pending API Functionalities" section in README.md
+- [ ] Move implemented features from "Missing" to "Recently Implemented" 
+- [ ] Update Implementation Status table with current coverage percentages
+- [ ] Update test coverage stats in README.md (lines covered and test count)
+- [ ] Ensure all new methods have YARD documentation
+- [ ] Update CHANGELOG.md with all changes
+
+### 2. Code Quality
 - [ ] Run RuboCop and fix all violations: `bundle exec rubocop -A`
-- [ ] Ensure no RuboCop offenses remain
+- [ ] Ensure no RuboCop offenses remain in production code (lib/ directory)
 - [ ] Run all tests: `bundle exec rspec`
-- [ ] Verify 100% test coverage: Check SimpleCov output
+- [ ] Verify test coverage meets target: Check SimpleCov output
 - [ ] Update version in `lib/attio/version.rb`
 - [ ] Update CHANGELOG.md with release date
 
-### 2. Testing Commands
+### 3. Testing Commands
 ```bash
 # Run all tests
 bundle exec rspec
@@ -35,14 +43,14 @@ bundle exec rubocop -A
 bundle outdated
 ```
 
-### 3. Documentation
+### 4. Documentation
 - [ ] Update README.md with new features
 - [ ] Add/update YARD documentation for new methods
 - [ ] Create example files for new features
 - [ ] Update API coverage section in README
 - [ ] Ensure all public methods have proper documentation
 
-### 4. Git Commit Standards
+### 5. Git Commit Standards
 
 #### Commit Message Format
 ```
@@ -340,15 +348,41 @@ Maintain this list in README.md:
 ### Webhook Headers
 - Uses `Attio-Signature` and `Attio-Timestamp` (no X- prefix)
 
+## Documentation Maintenance (CRITICAL)
+
+**ALWAYS update documentation BEFORE committing and pushing any changes:**
+
+1. **README.md Updates Required:**
+   - Update "Pending API Functionalities" section when implementing new endpoints
+   - Move completed features to "Recently Implemented" section
+   - Update Implementation Status table percentages
+   - Update test coverage numbers (both line count and test count)
+   - Update RuboCop status
+
+2. **When to Update Documentation:**
+   - BEFORE every commit that adds/modifies features
+   - BEFORE creating any release tag
+   - AFTER running tests to get accurate coverage numbers
+   - AFTER implementing any API endpoint
+
+3. **Documentation Checklist for New Features:**
+   - [ ] YARD documentation for all public methods
+   - [ ] Usage examples in method documentation
+   - [ ] README.md updated with feature status
+   - [ ] CHANGELOG.md updated with changes
+   - [ ] Test coverage numbers updated
+   - [ ] Implementation status table updated
+
 ## Final Reminders
 
 1. **NEVER** push code with failing tests
-2. **NEVER** push code with RuboCop violations
-3. **ALWAYS** update documentation with new features
-4. **ALWAYS** maintain 100% test coverage
+2. **NEVER** push code with RuboCop violations in lib/ directory
+3. **ALWAYS** update README.md "Pending API Functionalities" section FIRST
+4. **ALWAYS** maintain accurate test coverage numbers in README
 5. **ALWAYS** run the full test suite before committing
 6. **ALWAYS** update the version and CHANGELOG for releases
 7. **NEVER** create git commits without the co-author attribution
+8. **ALWAYS** keep documentation in sync with implementation
 
 ## Useful Commands Reference
 

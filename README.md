@@ -799,38 +799,42 @@ open coverage/index.html
 ```
 
 Current stats:
-- **Test Coverage**: 99.86% (1392/1394 lines)
-- **Test Count**: 658 tests
-- **RuboCop**: 0 violations
+- **Test Coverage**: 99.86% (1474/1476 lines)
+- **Test Count**: 768 tests
+- **RuboCop**: 0 violations in production code
 
 
 ## Pending API Functionalities
 
 The following Attio API endpoints are not yet implemented in this gem. Contributions are welcome!
 
-### 🔴 Critical Missing Endpoints
+### 🟢 Recently Implemented (v0.5.0)
 
-#### Records API
-- **Assert Record** (`PUT /v2/objects/{object}/records`) - Upsert functionality using matching attributes
-- **Update with PUT** (`PUT /v2/objects/{object}/records/{record_id}`) - Overwrites multiselect values (PATCH appends)
+The following critical endpoints were implemented in v0.5.0:
 
-#### Lists API  
-- **Create List** (`POST /v2/lists`) - Create new lists programmatically
-- **Update List** (`PATCH /v2/lists/{list}`) - Modify list configuration
-- **Query Entries** (`POST /v2/lists/{list}/entries/query`) - Advanced filtering and sorting
-- **Assert Entry** (`PUT /v2/lists/{list}/entries`) - Upsert list entries
-- **Update Entry** (`PATCH /v2/lists/{list}/entries/{entry}`) - Modify list entries
+#### Records API ✅
+- **Assert Record** (`PUT /v2/objects/{object}/records`) - Implemented via `client.records.assert`
+- **Update with PUT** (`PUT /v2/objects/{object}/records/{record_id}`) - Implemented via `client.records.update_with_put`
 
-#### Attributes API
-- **Update Attribute** (`PATCH /v2/{target}/{identifier}/attributes/{attribute}`) - Modify attribute properties
+#### Lists API ✅
+- **Create List** (`POST /v2/lists`) - Implemented via `client.lists.create`
+- **Update List** (`PATCH /v2/lists/{list}`) - Implemented via `client.lists.update`
+- **Query Entries** (`POST /v2/lists/{list}/entries/query`) - Implemented via `client.lists.query_entries`
+- **Assert Entry** (`PUT /v2/lists/{list}/entries`) - Implemented via `client.lists.assert_entry`
+- **Update Entry** (`PATCH /v2/lists/{list}/entries/{entry}`) - Implemented via `client.lists.update_entry`
+
+#### Attributes API ✅
+- **Update Attribute** (`PATCH /v2/objects/{object}/attributes/{attribute}`) - Implemented via `client.attributes.update`
 - **Select Options Management:**
-  - List Options (`GET /v2/{target}/{identifier}/attributes/{attribute}/options`)
-  - Create Option (`POST /v2/{target}/{identifier}/attributes/{attribute}/options`)
-  - Update Option (`PATCH /v2/{target}/{identifier}/attributes/{attribute}/options/{option}`)
+  - List Options - Implemented via `client.attributes.list_options`
+  - Create Option - Implemented via `client.attributes.create_option`
+  - Update Option - Implemented via `client.attributes.update_option`
 - **Status Management:**
-  - List Statuses (`GET /v2/{target}/{identifier}/attributes/{attribute}/statuses`)
-  - Create Status (`POST /v2/{target}/{identifier}/attributes/{attribute}/statuses`)
-  - Update Status (`PATCH /v2/{target}/{identifier}/attributes/{attribute}/statuses/{status}`)
+  - List Statuses - Implemented via `client.attributes.list_statuses`
+  - Create Status - Implemented via `client.attributes.create_status`
+  - Update Status - Implemented via `client.attributes.update_status`
+
+### 🔴 Still Missing Endpoints
 
 #### Webhook Management API (Entire Resource Missing)
 - **List Webhooks** (`GET /v2/webhooks`)
@@ -874,21 +878,23 @@ These operations are not available via the API and must be done through the Atti
 
 | Category | Coverage | Status |
 |----------|----------|--------|
-| **Records** | 85% | Missing assert/PUT operations |
-| **Objects** | 100% | Complete (API limitations noted) |
-| **Lists** | 60% | Missing create/update/query operations |
-| **Attributes** | 30% | Missing update and options management |
-| **Comments** | 100%+ | Over-implemented vs. documented API |
-| **Threads** | 100%+ | Over-implemented vs. documented API |
-| **Tasks** | 100% | Complete |
-| **Notes** | 100%+ | Over-implemented vs. documented API |
-| **Webhooks** | 50% | Event handling only, missing management |
-| **Users** | 100% | Complete |
-| **Workspace Members** | 100% | Complete |
-| **Meta/Self** | 100% | Complete |
-| **Values** | 0% | Not implemented |
-| **Analytics** | 0% | Not implemented |
-| **Import/Export** | 0% | Not implemented |
+| **Records** | 100% | ✅ Complete with assert/PUT operations |
+| **Objects** | 100% | ✅ Complete (API limitations noted) |
+| **Lists** | 100% | ✅ Complete with all CRUD and query operations |
+| **Attributes** | 100% | ✅ Complete with update and options/status management |
+| **Comments** | 100%+ | ✅ Over-implemented vs. documented API |
+| **Threads** | 100%+ | ✅ Over-implemented vs. documented API |
+| **Tasks** | 100% | ✅ Complete |
+| **Notes** | 100%+ | ✅ Over-implemented vs. documented API |
+| **Webhooks** | 50% | ⚠️ Event handling only, missing management API |
+| **Users** | 100% | ✅ Complete |
+| **Workspace Members** | 100% | ✅ Complete |
+| **Meta/Self** | 100% | ✅ Complete |
+| **Deals** | 100% | ✅ Complete |
+| **Bulk Operations** | 100% | ✅ Complete with batching |
+| **Values** | 0% | ❌ Not implemented |
+| **Analytics** | 0% | ❌ Not implemented |
+| **Import/Export** | 0% | ❌ Not implemented |
 
 ### Notes for Contributors
 
