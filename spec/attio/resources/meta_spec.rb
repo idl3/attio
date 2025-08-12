@@ -234,7 +234,7 @@ RSpec.describe Attio::Resources::Meta do
     end
   end
 
-  describe "#has_permission?" do
+  describe "#permission?" do
     let(:response) do
       {
         "data" => {
@@ -249,15 +249,19 @@ RSpec.describe Attio::Resources::Meta do
     end
 
     it "returns true for existing permission" do
-      expect(meta.has_permission?("comment:read-write")).to be true
+      expect(meta.permission?("comment:read-write")).to be true
     end
 
     it "returns false for non-existing permission" do
-      expect(meta.has_permission?("user_management:write")).to be false
+      expect(meta.permission?("user_management:write")).to be false
     end
 
     it "returns false for partial permission match" do
-      expect(meta.has_permission?("comment:read")).to be false
+      expect(meta.permission?("comment:read")).to be false
+    end
+    
+    it "has backward compatible alias has_permission?" do
+      expect(meta.has_permission?("comment:read-write")).to be true
     end
   end
 

@@ -1,11 +1,11 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'bundler/setup'
-require 'attio'
+require "bundler/setup"
+require "attio"
 
 # Test Meta resource against production API
-API_KEY = ENV['API_KEY'] || '5472096a0d3ad936523a7a9101807bb3155616a3e04a7649ad41cd5a0261dddd'
+API_KEY = ENV["API_KEY"] || "5472096a0d3ad936523a7a9101807bb3155616a3e04a7649ad41cd5a0261dddd"
 
 puts "Testing Meta Resource Against Production API"
 puts "=" * 50
@@ -75,6 +75,6 @@ puts "\n9. Testing enhanced client health check:"
 enhanced = Attio::EnhancedClient.new(api_key: API_KEY)
 puts "   Health check passes: #{enhanced.send(:check_api_health)}"
 
-puts "\n" + "=" * 50
+puts "\n#{'=' * 50}"
 puts "✅ All Meta Resource Tests Passed!"
 puts "=" * 50

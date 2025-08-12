@@ -22,7 +22,7 @@ module Attio
     #   puts "Working in: #{workspace['name']} (#{workspace['id']})"
     #
     # @example Check permissions
-    #   if client.meta.has_permission?("record_permission:read-write")
+    #   if client.meta.permission?("record_permission:read-write")
     #     # Can read and write records
     #   end
     class Meta < Base
@@ -88,7 +88,7 @@ module Attio
       def permissions
         response = identify
         scope = response.dig("data", "scope") || ""
-        scope.split(" ")
+        scope.split
       end
 
       # Check if token has a specific permission
@@ -96,12 +96,15 @@ module Attio
       # @param permission [String] The permission to check (e.g., "comment:read-write")
       # @return [Boolean] true if permission is granted
       # @example
-      #   if client.meta.has_permission?("record_permission:read-write")
+      #   if client.meta.permission?("record_permission:read-write")
       #     # Can manage records
       #   end
-      def has_permission?(permission)
+      def permission?(permission)
         permissions.include?(permission)
       end
+
+      # Alias for backward compatibility
+      alias has_permission? permission?
 
       # Get token expiration and metadata
       #
