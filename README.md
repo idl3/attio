@@ -804,6 +804,99 @@ Current stats:
 - **RuboCop**: 0 violations
 
 
+## Pending API Functionalities
+
+The following Attio API endpoints are not yet implemented in this gem. Contributions are welcome!
+
+### 🔴 Critical Missing Endpoints
+
+#### Records API
+- **Assert Record** (`PUT /v2/objects/{object}/records`) - Upsert functionality using matching attributes
+- **Update with PUT** (`PUT /v2/objects/{object}/records/{record_id}`) - Overwrites multiselect values (PATCH appends)
+
+#### Lists API  
+- **Create List** (`POST /v2/lists`) - Create new lists programmatically
+- **Update List** (`PATCH /v2/lists/{list}`) - Modify list configuration
+- **Query Entries** (`POST /v2/lists/{list}/entries/query`) - Advanced filtering and sorting
+- **Assert Entry** (`PUT /v2/lists/{list}/entries`) - Upsert list entries
+- **Update Entry** (`PATCH /v2/lists/{list}/entries/{entry}`) - Modify list entries
+
+#### Attributes API
+- **Update Attribute** (`PATCH /v2/{target}/{identifier}/attributes/{attribute}`) - Modify attribute properties
+- **Select Options Management:**
+  - List Options (`GET /v2/{target}/{identifier}/attributes/{attribute}/options`)
+  - Create Option (`POST /v2/{target}/{identifier}/attributes/{attribute}/options`)
+  - Update Option (`PATCH /v2/{target}/{identifier}/attributes/{attribute}/options/{option}`)
+- **Status Management:**
+  - List Statuses (`GET /v2/{target}/{identifier}/attributes/{attribute}/statuses`)
+  - Create Status (`POST /v2/{target}/{identifier}/attributes/{attribute}/statuses`)
+  - Update Status (`PATCH /v2/{target}/{identifier}/attributes/{attribute}/statuses/{status}`)
+
+#### Webhook Management API (Entire Resource Missing)
+- **List Webhooks** (`GET /v2/webhooks`)
+- **Create Webhook** (`POST /v2/webhooks`)
+- **Get Webhook** (`GET /v2/webhooks/{webhook_id}`)
+- **Update Webhook** (`PATCH /v2/webhooks/{webhook_id}`)
+- **Delete Webhook** (`DELETE /v2/webhooks/{webhook_id}`)
+
+### 🟡 Advanced Features Not Implemented
+
+#### Values API (Entire Resource Missing)
+- Historic value tracking
+- Value validation endpoints
+- Format conversion utilities
+- Computed values
+
+#### Import/Export API
+- Bulk data import endpoints
+- Export jobs management
+- Import mapping configuration
+
+#### Analytics & Reporting
+- Aggregation queries
+- Report generation
+- Dashboard metrics
+- Activity analytics
+
+#### Advanced Search
+- Cross-object search
+- Full-text search capabilities
+- Saved search management
+
+### 🟢 API Limitations (Not Supported by Attio)
+
+These operations are not available via the API and must be done through the Attio UI:
+- **Delete Custom Objects** - Must use Settings > Data Model > Objects
+- **Delete Attributes** - Not supported via API
+- **Webhook Configuration** (in some cases) - UI configuration required
+
+### Implementation Status by Category
+
+| Category | Coverage | Status |
+|----------|----------|--------|
+| **Records** | 85% | Missing assert/PUT operations |
+| **Objects** | 100% | Complete (API limitations noted) |
+| **Lists** | 60% | Missing create/update/query operations |
+| **Attributes** | 30% | Missing update and options management |
+| **Comments** | 100%+ | Over-implemented vs. documented API |
+| **Threads** | 100%+ | Over-implemented vs. documented API |
+| **Tasks** | 100% | Complete |
+| **Notes** | 100%+ | Over-implemented vs. documented API |
+| **Webhooks** | 50% | Event handling only, missing management |
+| **Users** | 100% | Complete |
+| **Workspace Members** | 100% | Complete |
+| **Meta/Self** | 100% | Complete |
+| **Values** | 0% | Not implemented |
+| **Analytics** | 0% | Not implemented |
+| **Import/Export** | 0% | Not implemented |
+
+### Notes for Contributors
+
+1. **Authentication**: Some endpoints require specific scopes (e.g., `object_configuration:read-write`)
+2. **Rate Limiting**: The gem includes rate limiting support for all new endpoints
+3. **Testing**: Please add comprehensive tests for any new endpoints
+4. **Documentation**: Update both inline YARD docs and README examples
+
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/idl3/attio.
