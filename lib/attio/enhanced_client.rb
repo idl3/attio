@@ -98,6 +98,12 @@ module Attio
     def shutdown!
       @pool&.shutdown
       @instrumentation&.disable!
+
+      # Gracefully stop background stats thread
+      return unless @stats_thread&.alive?
+
+      @stats_thread.kill
+      @stats_thread.join(5) # Wait up to 5 seconds for clean shutdown
     end
 
     private def setup_connection_pool(config)
@@ -108,7 +114,8 @@ module Attio
         HttpClient.new(
           base_url: API_BASE_URL,
           headers: default_headers,
-          timeout: timeout
+          timeout: timeout,
+          rate_limiter: rate_limiter
         )
       end
     end
@@ -141,11 +148,23 @@ module Attio
       # Start background stats reporter if pool exists
       return unless @pool
 
-      Thread.new do
+      @stats_thread = Thread.new do
         loop do
           sleep 60 # Report every minute
-          @instrumentation.record_pool_stats(@pool.stats)
+          @instrumentation.record_pool_stats(@pool.stats) if @pool
+        rescue StandardError => e
+          @instrumentation.logger.error(
+            "Background stats thread error: #{e.class.name}: #{e.message}\n" \
+            "Backtrace: #{e.backtrace.join("\n")}"
+          )
+          # Continue the loop to keep the thread alive
         end
+      rescue StandardError => e
+        @instrumentation.logger.fatal(
+          "Background stats thread crashed: #{e.class.name}: #{e.message}\n" \
+          "Backtrace: #{e.backtrace.join("\n")}"
+        )
+        # Thread will exit, but this prevents it from crashing silently
       end
     end
 
@@ -204,7 +223,7 @@ module Attio
     end
 
     private def check_api_health
-      connection.get("meta/status")
+      connection.get("meta/identify")
       true
     rescue StandardError
       false

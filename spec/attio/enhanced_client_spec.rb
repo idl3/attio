@@ -84,10 +84,13 @@ RSpec.describe Attio::EnhancedClient do
         # Give the thread time to start and execute
         sleep 0.1
         
-        # Find and clean up the background thread
-        threads = Thread.list.select { |t| t.alive? && t != Thread.main }
-        background_thread = threads.find { |t| t != Thread.current }
-        background_thread.kill if background_thread
+        # Check that the stats thread was created
+        stats_thread = client.instance_variable_get(:@stats_thread)
+        expect(stats_thread).to be_a(Thread)
+        expect(stats_thread.alive?).to be true
+        
+        # Clean up the background thread
+        client.shutdown!
       end
     end
 
@@ -295,10 +298,11 @@ RSpec.describe Attio::EnhancedClient do
     it "creates actual HttpClient instances in the pool" do
       # Mock the HttpClient class
       http_client_class = Class.new do
-        def initialize(base_url:, headers:, timeout:)
+        def initialize(base_url:, headers:, timeout:, rate_limiter: nil)
           @base_url = base_url
           @headers = headers
           @timeout = timeout
+          @rate_limiter = rate_limiter
         end
         
         def get(path)
@@ -355,7 +359,7 @@ RSpec.describe Attio::EnhancedClient do
       client = described_class.new(api_key: api_key)
       
       allow(client).to receive(:connection).and_return(connection)
-      allow(connection).to receive(:get).with("meta/status").and_raise(StandardError)
+      allow(connection).to receive(:get).with("meta/identify").and_raise(StandardError)
       
       result = client.send(:check_api_health)
       expect(result).to be false
@@ -365,7 +369,7 @@ RSpec.describe Attio::EnhancedClient do
       client = described_class.new(api_key: api_key)
       
       allow(client).to receive(:connection).and_return(connection)
-      allow(connection).to receive(:get).with("meta/status").and_return({ "status" => "ok" })
+      allow(connection).to receive(:get).with("meta/identify").and_return({ "workspace" => { "id" => "test" } })
       
       result = client.send(:check_api_health)
       expect(result).to be true
@@ -402,6 +406,55 @@ RSpec.describe Attio::EnhancedClient do
       expect(pool).to receive(:shutdown)
       expect(instrumentation).to receive(:disable!)
       
+      client.shutdown!
+    end
+
+    it "gracefully stops background stats thread" do
+      # Give the background thread time to start
+      sleep 0.1
+      
+      stats_thread = client.instance_variable_get(:@stats_thread)
+      expect(stats_thread).to be_a(Thread)
+      expect(stats_thread.alive?).to be true
+      
+      # Shutdown should stop the thread
+      client.shutdown!
+      
+      # Wait a bit and check thread is dead
+      sleep 0.1
+      expect(stats_thread.alive?).to be false
+    end
+  end
+
+  describe "background thread error handling" do
+    let(:logger) { Logger.new(StringIO.new) }
+    let(:client) do
+      described_class.new(
+        api_key: api_key,
+        connection_pool: { size: 2 },
+        instrumentation: { logger: logger, metrics: :memory }
+      )
+    end
+
+    it "handles errors in background stats collection and continues running" do
+      # Mock pool stats to raise an error
+      pool = client.instance_variable_get(:@pool)
+      
+      allow(pool).to receive(:stats).and_raise(StandardError, "Mock error")
+      allow_any_instance_of(Object).to receive(:sleep).and_call_original
+      allow_any_instance_of(Object).to receive(:sleep).with(60).and_return(nil)
+      
+      # Expect error to be logged (allow multiple occurrences since thread is running continuously)
+      expect(logger).to receive(:error).with(/Background stats thread error/).at_least(:once)
+      
+      # Give the thread time to start and hit the error
+      sleep 0.1
+      
+      # Thread should still be alive after the error
+      stats_thread = client.instance_variable_get(:@stats_thread)
+      expect(stats_thread.alive?).to be true
+      
+      # Clean up
       client.shutdown!
     end
   end
