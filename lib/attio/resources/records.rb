@@ -153,6 +153,74 @@ module Attio
         request(:delete, "objects/#{object}/records/#{id}")
       end
 
+      # Assert (upsert) a record based on a matching attribute.
+      #
+      # This method creates or updates a record based on a matching attribute,
+      # providing upsert functionality. If a record with the matching attribute
+      # value exists, it will be updated; otherwise, a new record will be created.
+      #
+      # @param object [String] The object type (e.g., 'people', 'companies')
+      # @param matching_attribute [String] The attribute to match against for upsert
+      # @param data [Hash] The record data to create or update
+      #
+      # @return [Hash] The created or updated record data
+      # @raise [ArgumentError] if object, matching_attribute, or data is invalid
+      #
+      # @example Assert a person by email
+      #   record = client.records.assert(
+      #     object: 'people',
+      #     matching_attribute: 'email',
+      #     data: {
+      #       name: 'Jane Doe',
+      #       email: 'jane@example.com',
+      #       company: { target_object: 'companies', target_record_id: 'company123' }
+      #     }
+      #   )
+      def assert(object:, matching_attribute:, data:)
+        validate_required_string!(object, "Object type")
+        validate_required_string!(matching_attribute, "Matching attribute")
+        validate_record_data!(data)
+
+        request_body = {
+          data: data,
+          matching_attribute: matching_attribute,
+        }
+
+        request(:put, "objects/#{object}/records", request_body)
+      end
+
+      # Update a record using PUT (replace operation).
+      #
+      # This method performs a complete replacement of the record, unlike the
+      # regular update method which uses PATCH. For multiselect fields, this
+      # overwrites the values instead of appending to them.
+      #
+      # @param object [String] The object type (e.g., 'people', 'companies')
+      # @param id [String] The record ID to replace
+      # @param data [Hash] The complete record data to replace with
+      #
+      # @return [Hash] The updated record data
+      # @raise [ArgumentError] if object, id, or data is invalid
+      #
+      # @example Replace a person's data
+      #   record = client.records.update_with_put(
+      #     object: 'people',
+      #     id: 'abc123',
+      #     data: {
+      #       name: 'Jane Smith',
+      #       email: 'jane.smith@example.com',
+      #       tags: ['customer', 'vip']  # This will replace all existing tags
+      #     }
+      #   )
+      def update_with_put(object:, id:, data:)
+        validate_required_string!(object, "Object type")
+        validate_id!(id, "Record")
+        validate_record_data!(data)
+
+        request_body = { data: data }
+        request(:put, "objects/#{object}/records/#{id}", request_body)
+      end
+
       # Validates that the data parameter is present and is a hash.
       #
       # @param data [Hash, nil] The data to validate
