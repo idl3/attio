@@ -5,6 +5,8 @@ RSpec.describe Attio::HttpClient do
   let(:headers) { { "Authorization" => "Bearer token" } }
   let(:timeout) { 30 }
   let(:client) { described_class.new(base_url: base_url, headers: headers, timeout: timeout) }
+  let(:rate_limiter) { instance_double(Attio::RateLimiter) }
+  let(:client_with_rate_limiter) { described_class.new(base_url: base_url, headers: headers, timeout: timeout, rate_limiter: rate_limiter) }
 
   describe "#initialize" do
     it "sets the base URL" do
@@ -22,6 +24,15 @@ RSpec.describe Attio::HttpClient do
     it "uses default timeout if not provided" do
       client = described_class.new(base_url: base_url, headers: headers)
       expect(client.timeout).to eq(Attio::HttpClient::DEFAULT_TIMEOUT)
+    end
+
+    it "accepts optional rate limiter" do
+      client = described_class.new(base_url: base_url, headers: headers, rate_limiter: rate_limiter)
+      expect(client.rate_limiter).to eq(rate_limiter)
+    end
+
+    it "defaults rate limiter to nil" do
+      expect(client.rate_limiter).to be_nil
     end
   end
 
@@ -166,8 +177,30 @@ RSpec.describe Attio::HttpClient do
     context "when rate limited" do
       it "raises RateLimitError" do
         allow(response).to receive_messages(code: 429, body: '{"error":"Rate limit exceeded"}')
+        allow(response).to receive(:headers).and_return({})
 
         expect { client.get(path) }.to raise_error(Attio::RateLimitError, "Rate limit exceeded")
+      end
+
+      it "includes retry_after when provided in headers" do
+        allow(response).to receive_messages(code: 429, body: '{"error":"Rate limit exceeded"}')
+        allow(response).to receive(:headers).and_return({ "Retry-After" => "120" })
+
+        expect { client.get(path) }.to raise_error do |error|
+          expect(error).to be_a(Attio::RateLimitError)
+          expect(error.retry_after).to eq(120)
+          expect(error.code).to eq(429)
+        end
+      end
+
+      it "handles invalid retry_after header" do
+        allow(response).to receive_messages(code: 429, body: '{"error":"Rate limit exceeded"}')
+        allow(response).to receive(:headers).and_return({ "Retry-After" => "invalid" })
+
+        expect { client.get(path) }.to raise_error do |error|
+          expect(error).to be_a(Attio::RateLimitError)
+          expect(error.retry_after).to eq(60) # Default fallback
+        end
       end
     end
 
@@ -208,6 +241,98 @@ RSpec.describe Attio::HttpClient do
         allow(response).to receive_messages(code: 500, body: "Plain text error")
 
         expect { client.get(path) }.to raise_error(Attio::ServerError, "Plain text error")
+      end
+    end
+  end
+
+  describe "rate limiting integration" do
+    let(:path) { "test" }
+    let(:response) { double("Typhoeus::Response") }
+    let(:request) { double("Typhoeus::Request") }
+
+    before do
+      allow(request).to receive(:run).and_return(response)
+      allow(Typhoeus::Request).to receive(:new).and_return(request)
+    end
+
+    context "when rate limiter is present" do
+      it "executes request through rate limiter" do
+        allow(rate_limiter).to receive(:execute).and_yield
+        allow(response).to receive_messages(code: 200, body: '{"result":"success"}')
+        allow(response).to receive(:headers).and_return({
+          "X-RateLimit-Limit" => "1000",
+          "X-RateLimit-Remaining" => "999",
+          "X-RateLimit-Reset" => "1642684800"
+        })
+
+        result = client_with_rate_limiter.get(path)
+
+        expect(rate_limiter).to have_received(:execute)
+        expect(result).to include(
+          "result" => "success",
+          "_headers" => {
+            "x-ratelimit-limit" => "1000",
+            "x-ratelimit-remaining" => "999",
+            "x-ratelimit-reset" => "1642684800"
+          }
+        )
+      end
+
+      it "propagates rate limiter errors" do
+        allow(rate_limiter).to receive(:execute).and_raise(Attio::RateLimitError.new("Rate limited by client"))
+
+        expect { client_with_rate_limiter.get(path) }.to raise_error(Attio::RateLimitError, "Rate limited by client")
+      end
+
+      it "extracts rate limit headers from successful responses" do
+        allow(rate_limiter).to receive(:execute).and_yield
+        allow(response).to receive_messages(code: 200, body: '{"data":"test"}')
+        allow(response).to receive(:headers).and_return({
+          "Content-Type" => "application/json",
+          "X-RateLimit-Limit" => "5000",
+          "X-RateLimit-Remaining" => "4999",
+          "X-RateLimit-Reset" => "1642684800",
+          "Other-Header" => "ignored"
+        })
+
+        result = client_with_rate_limiter.get(path)
+
+        expect(result["_headers"]).to eq({
+          "x-ratelimit-limit" => "5000",
+          "x-ratelimit-remaining" => "4999",
+          "x-ratelimit-reset" => "1642684800"
+        })
+      end
+
+      it "handles missing rate limit headers gracefully" do
+        allow(rate_limiter).to receive(:execute).and_yield
+        allow(response).to receive_messages(code: 200, body: '{"data":"test"}')
+        allow(response).to receive(:headers).and_return({ "Content-Type" => "application/json" })
+
+        result = client_with_rate_limiter.get(path)
+
+        expect(result["_headers"]).to eq({})
+      end
+    end
+
+    context "when rate limiter is not present" do
+      it "does not add headers to response" do
+        allow(response).to receive_messages(code: 200, body: '{"result":"success"}')
+
+        result = client.get(path)
+
+        expect(result).to eq({ "result" => "success" })
+        expect(result).not_to have_key("_headers")
+      end
+
+      it "still handles 429 responses properly" do
+        allow(response).to receive_messages(code: 429, body: '{"error":"Rate limit exceeded"}')
+        allow(response).to receive(:headers).and_return({ "Retry-After" => "60" })
+
+        expect { client.get(path) }.to raise_error do |error|
+          expect(error).to be_a(Attio::RateLimitError)
+          expect(error.retry_after).to eq(60)
+        end
       end
     end
   end
