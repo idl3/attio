@@ -303,7 +303,6 @@ Maintain this list in README.md:
 - [x] Users - List, Get
 - [x] Deals - Full CRUD, Win/Loss tracking
 - [x] Workspace Members - Management, Invitations
-- [x] Meta API - Identify, Validate, Usage Stats
 - [x] Bulk Operations - Batch operations with automatic batching
 
 ### Enterprise Features
@@ -316,11 +315,30 @@ Maintain this list in README.md:
 
 ## Quality Metrics to Maintain
 
-- **Test Coverage**: 100% (1311/1311 lines) ✅ ACHIEVED
-- **Test Count**: 590 tests ✅ ACHIEVED
+- **Test Coverage**: 98.74% (1329/1346 lines) ✅ CURRENT
+- **Test Count**: 607 tests ✅ CURRENT  
 - **RuboCop Offenses**: 0 ✅ ACHIEVED
 - **Documentation Coverage**: 100% for public methods
 - **Example Coverage**: Example for each major feature including enterprise features
+
+## Important API Findings (v0.4.1)
+
+### Records API
+- **List/Query Records**: Uses POST to `/v2/objects/{object}/records/query` (NOT GET)
+- **Get Single Record**: Uses GET to `/v2/objects/{object}/records/{record_id}`
+- **Create Record**: Uses POST to `/v2/objects/{object}/records`
+- **Update Record**: Uses PATCH/PUT to `/v2/objects/{object}/records/{record_id}`
+- **Delete Record**: Uses DELETE to `/v2/objects/{object}/records/{record_id}`
+
+### Available Endpoints (Confirmed)
+- `/v2/self` - Get authenticated user info (replaces fake meta/identify)
+- `/v2/objects` - List available objects in workspace
+- `/v2/lists` - List management
+- `/v2/workspace_members` - Workspace member management
+- `/v2/users` - May require specific permissions (returns 404 with basic key)
+
+### Webhook Headers
+- Uses `Attio-Signature` and `Attio-Timestamp` (no X- prefix)
 
 ## Final Reminders
 

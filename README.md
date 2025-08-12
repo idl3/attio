@@ -1,10 +1,10 @@
 # Attio Ruby Client
 
 [![Tests](https://github.com/idl3/attio/actions/workflows/tests.yml/badge.svg)](https://github.com/idl3/attio/actions/workflows/tests.yml)
-[![Test Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen.svg)](https://github.com/idl3/attio/tree/master/spec)
+[![Test Coverage](https://img.shields.io/badge/coverage-98.81%25-brightgreen.svg)](https://github.com/idl3/attio/tree/master/spec)
 [![Documentation](https://img.shields.io/badge/docs-yard-blue.svg)](https://idl3.github.io/attio)
 [![Gem Version](https://badge.fury.io/rb/attio.svg)](https://badge.fury.io/rb/attio)
-[![RSpec](https://img.shields.io/badge/RSpec-392_tests-green.svg)](https://github.com/idl3/attio/tree/master/spec)
+[![RSpec](https://img.shields.io/badge/RSpec-607_tests-green.svg)](https://github.com/idl3/attio/tree/master/spec)
 
 Ruby client for the [Attio CRM API](https://developers.attio.com/). This library provides easy access to the Attio API, allowing you to manage records, objects, lists, and more.
 
@@ -84,22 +84,21 @@ client = Attio::Client.new(api_key: 'your-api-key', timeout: 60)
 # List all people
 people = client.records.list(object: 'people')
 
-# List with filters
+# List with filtering and sorting
 filtered_people = client.records.list(
   object: 'people',
-  filters: {
-    name: { contains: 'John' },
-    company: { target_object: 'companies', target_record_id: 'company-123' }
+  filter: {
+    name: { $contains: 'John' }
   },
-  limit: 50
+  sort: 'created_at.desc',
+  limit: 50,
+  offset: 0
 )
 
-# List with sorting
-sorted_people = client.records.list(
-  object: 'people',
-  sorts: [{ field: 'created_at', direction: 'desc' }],
-  limit: 25
-)
+# List all records with automatic pagination
+client.records.list_all(object: 'people', page_size: 50).each do |person|
+  puts person['name']
+end
 ```
 
 #### Creating Records
@@ -473,25 +472,6 @@ status = limiter.status
 puts "Remaining: #{status[:remaining]}/#{status[:limit]}"
 ```
 
-#### Meta API
-
-```ruby
-# Identify current workspace and user
-info = client.meta.identify
-puts "Workspace: #{info['workspace']['name']}"
-puts "User: #{info['user']['email']}"
-
-# Validate API key
-validation = client.meta.validate_key
-puts "Valid: #{validation['valid']}"
-puts "Permissions: #{validation['permissions']}"
-
-# Get usage statistics
-usage = client.meta.usage_stats
-puts "Records: #{usage['records']['total']}"
-puts "API calls today: #{usage['api_calls']['today']}"
-```
-
 ## Enterprise Features
 
 The gem includes advanced enterprise features for production use:
@@ -717,7 +697,6 @@ This client supports all major Attio API endpoints:
 ### Advanced Features
 - ✅ **Bulk Operations** - Batch create/update/delete with automatic batching (1000 items max)
 - ✅ **Rate Limiting** - Intelligent retry with exponential backoff and request queuing
-- ✅ **Meta API** - Identify workspace, validate API keys, get usage stats
 
 ### Enterprise Features
 - ✅ **Enhanced Client** - Production-ready client with pooling, circuit breaker, and observability
@@ -766,6 +745,36 @@ Current stats:
 - **Test Coverage**: 100% (1311/1311 lines)
 - **Test Count**: 590 tests
 - **RuboCop**: 0 violations
+
+## Migration from v0.3.0 to v0.4.0
+
+### Breaking Changes
+
+1. **Meta API Removed**: The Meta resource was completely fake and has been removed.
+   ```ruby
+   # OLD (will not work)
+   client.meta.identify
+   
+   # NEW - use a real endpoint if needed
+   # No direct replacement - Meta API didn't exist in Attio
+   ```
+
+2. **Webhook Headers Fixed**: Header names no longer have X- prefix.
+   ```ruby
+   # OLD
+   headers["X-Attio-Signature"]
+   
+   # NEW
+   headers["Attio-Signature"]
+   ```
+
+3. **Records List Method**: Now uses GET instead of POST internally (no API change needed).
+
+### New Features
+
+- **Rate Limiting**: Now automatically enforced
+- **Pagination**: Use `list_all` for automatic pagination
+- **Filtering**: Full support for Attio's filter syntax
 
 ## Contributing
 
