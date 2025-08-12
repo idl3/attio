@@ -46,8 +46,8 @@ RSpec.describe Attio::Webhooks do
     let(:signature) { OpenSSL::HMAC.hexdigest("SHA256", secret, signed_payload) }
     let(:headers) do
       {
-        "X-Attio-Signature" => signature,
-        "X-Attio-Timestamp" => timestamp
+        "Attio-Signature" => signature,
+        "Attio-Timestamp" => timestamp
       }
     end
 
@@ -74,7 +74,7 @@ RSpec.describe Attio::Webhooks do
 
     context "with invalid signature" do
       it "raises InvalidSignatureError" do
-        headers["X-Attio-Signature"] = "invalid_signature"
+        headers["Attio-Signature"] = "invalid_signature"
         expect do
           webhooks.process(payload, headers)
         end.to raise_error(Attio::Webhooks::InvalidSignatureError)
@@ -83,14 +83,14 @@ RSpec.describe Attio::Webhooks do
 
     context "with missing headers" do
       it "raises MissingHeaderError when signature is missing" do
-        headers.delete("X-Attio-Signature")
+        headers.delete("Attio-Signature")
         expect do
           webhooks.process(payload, headers)
         end.to raise_error(Attio::Webhooks::MissingHeaderError)
       end
 
       it "raises MissingHeaderError when timestamp is missing" do
-        headers.delete("X-Attio-Timestamp")
+        headers.delete("Attio-Timestamp")
         expect do
           webhooks.process(payload, headers)
         end.to raise_error(Attio::Webhooks::MissingHeaderError)
@@ -101,7 +101,7 @@ RSpec.describe Attio::Webhooks do
       it "raises JSON::ParserError" do
         invalid_payload = "not json"
         signed_payload = "#{timestamp}.#{invalid_payload}"
-        headers["X-Attio-Signature"] = OpenSSL::HMAC.hexdigest("SHA256", secret, signed_payload)
+        headers["Attio-Signature"] = OpenSSL::HMAC.hexdigest("SHA256", secret, signed_payload)
 
         expect do
           webhooks.process(invalid_payload, headers)
@@ -113,8 +113,8 @@ RSpec.describe Attio::Webhooks do
       it "raises InvalidTimestampError" do
         old_timestamp = (Time.now.to_i - 400).to_s
         old_signed_payload = "#{old_timestamp}.#{payload}"
-        headers["X-Attio-Signature"] = OpenSSL::HMAC.hexdigest("SHA256", secret, old_signed_payload)
-        headers["X-Attio-Timestamp"] = old_timestamp
+        headers["Attio-Signature"] = OpenSSL::HMAC.hexdigest("SHA256", secret, old_signed_payload)
+        headers["Attio-Timestamp"] = old_timestamp
 
         expect do
           webhooks.process(payload, headers)
@@ -333,7 +333,7 @@ RSpec.describe Attio::WebhookServer do
       req = double("request",
         request_method: "POST",
         body: '{"id": "evt_123", "type": "test"}',
-        header: { "X-Attio-Signature" => "sig", "X-Attio-Timestamp" => Time.now.to_i.to_s }
+        header: { "Attio-Signature" => "sig", "Attio-Timestamp" => Time.now.to_i.to_s }
       )
       res = double("response")
       
@@ -447,8 +447,8 @@ RSpec.describe Attio::WebhookServer do
           request_method: "POST",
           body: '{"type":"test.event","data":{}}',
           header: {
-            "X-Attio-Signature" => "sig",
-            "X-Attio-Timestamp" => Time.now.to_i.to_s
+            "Attio-Signature" => "sig",
+            "Attio-Timestamp" => Time.now.to_i.to_s
           }
         )
         res = double("response")

@@ -86,8 +86,8 @@ module Attio
     end
 
     private def verify_webhook!(payload, headers)
-      signature = extract_header(headers, "X-Attio-Signature")
-      timestamp = extract_header(headers, "X-Attio-Timestamp")
+      signature = extract_header(headers, "Attio-Signature")
+      timestamp = extract_header(headers, "Attio-Timestamp")
 
       # Verify timestamp to prevent replay attacks
       verify_timestamp!(timestamp)
