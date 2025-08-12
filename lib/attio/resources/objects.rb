@@ -61,7 +61,7 @@ module Attio
         data = {
           api_slug: api_slug,
           singular_noun: singular_noun,
-          plural_noun: plural_noun
+          plural_noun: plural_noun,
         }
 
         request(:post, "objects", { data: data })
@@ -95,12 +95,33 @@ module Attio
         data[:singular_noun] = singular_noun if singular_noun
         data[:plural_noun] = plural_noun if plural_noun
 
-        if data.empty?
-          raise ArgumentError, "At least one field to update is required"
-        end
+        raise ArgumentError, "At least one field to update is required" if data.empty?
 
         request(:patch, "objects/#{id_or_slug}", { data: data })
       end
+
+      # Delete a custom object
+      #
+      # NOTE: The Attio API v2.0.0 does not currently support deleting custom objects.
+      # To delete a custom object, please visit your Attio settings at:
+      # Settings > Data Model > Objects
+      #
+      # @param id_or_slug [String] The object ID or slug to delete
+      # @raise [NotImplementedError] Always raised as the API doesn't support this operation
+      # @example
+      #   client.objects.delete(id_or_slug: "projects")
+      #   # => NotImplementedError: The Attio API does not currently support deleting custom objects.
+      #   #    Please delete objects through the Attio UI at: Settings > Data Model > Objects
+      def delete(id_or_slug:)
+        validate_id_or_slug!(id_or_slug)
+        raise NotImplementedError,
+              "The Attio API does not currently support deleting custom objects. " \
+              "Please delete objects through the Attio UI at: Settings > Data Model > Objects"
+      end
+
+      # Alias for delete method for consistency with other resources
+      # NOTE: See delete method for API limitations
+      alias destroy delete
 
       private def validate_id_or_slug!(id_or_slug)
         raise ArgumentError, "Object ID or slug is required" if id_or_slug.nil? || id_or_slug.to_s.strip.empty?

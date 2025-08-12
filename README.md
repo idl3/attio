@@ -4,7 +4,7 @@
 [![Test Coverage](https://img.shields.io/badge/coverage-99.86%25-brightgreen.svg)](https://github.com/idl3/attio/tree/master/spec)
 [![Documentation](https://img.shields.io/badge/docs-yard-blue.svg)](https://idl3.github.io/attio)
 [![Gem Version](https://badge.fury.io/rb/attio.svg)](https://badge.fury.io/rb/attio)
-[![RSpec](https://img.shields.io/badge/RSpec-651_tests-green.svg)](https://github.com/idl3/attio/tree/master/spec)
+[![RSpec](https://img.shields.io/badge/RSpec-658_tests-green.svg)](https://github.com/idl3/attio/tree/master/spec)
 
 Ruby client for the [Attio CRM API](https://developers.attio.com/). This library provides easy access to the Attio API, allowing you to manage records, objects, lists, and more.
 
@@ -332,6 +332,10 @@ client.objects.update(
   singular_noun: 'Active Project',
   plural_noun: 'Active Projects'
 )
+
+# NOTE: The Attio API v2.0.0 does not currently support deleting custom objects
+# Calling delete/destroy will raise NotImplementedError with instructions
+# To delete objects, use: Settings > Data Model > Objects in the Attio UI
 ```
 
 #### Lists
@@ -795,8 +799,8 @@ open coverage/index.html
 ```
 
 Current stats:
-- **Test Coverage**: 99.86% (1388/1390 lines)
-- **Test Count**: 651 tests
+- **Test Coverage**: 99.86% (1392/1394 lines)
+- **Test Count**: 658 tests
 - **RuboCop**: 0 violations
 
 

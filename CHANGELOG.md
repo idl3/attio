@@ -8,11 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- **Custom Objects Support**: Full create and update operations for custom objects
+- **Custom Objects Support**: Create and update operations for custom objects
   - Create custom objects with `client.objects.create(api_slug:, singular_noun:, plural_noun:)`
   - Update custom objects with `client.objects.update(id_or_slug:, ...)`
+  - Delete method raises `NotImplementedError` with helpful message directing to Attio UI
   - Proper validation and error handling for all operations
-  - Comprehensive test coverage with 21 new test cases
+  - Comprehensive test coverage with 28 new test cases
+
+### Notes
+- Delete operation for custom objects is not supported by the Attio API v2.0.0
+- Users are directed to delete objects through Settings > Data Model > Objects in the Attio UI
 
 ## [0.4.0] - 2025-01-12
 

@@ -312,4 +312,62 @@ RSpec.describe Attio::Resources::Objects do
       end
     end
   end
+
+  describe "#delete" do
+    let(:id_or_slug) { "projects" }
+    let(:error_message) do
+      "The Attio API does not currently support deleting custom objects. " \
+      "Please delete objects through the Attio UI at: Settings > Data Model > Objects"
+    end
+
+    it "raises NotImplementedError with helpful message" do
+      expect do
+        objects.delete(id_or_slug: id_or_slug)
+      end.to raise_error(NotImplementedError, error_message)
+    end
+
+    it "validates id_or_slug before raising NotImplementedError" do
+      expect do
+        objects.delete(id_or_slug: nil)
+      end.to raise_error(ArgumentError, "Object ID or slug is required")
+    end
+
+    context "with nil id_or_slug" do
+      it "raises ArgumentError" do
+        expect do
+          objects.delete(id_or_slug: nil)
+        end.to raise_error(ArgumentError, "Object ID or slug is required")
+      end
+    end
+
+    context "with empty string id_or_slug" do
+      it "raises ArgumentError" do
+        expect do
+          objects.delete(id_or_slug: "")
+        end.to raise_error(ArgumentError, "Object ID or slug is required")
+      end
+    end
+
+    context "with whitespace only id_or_slug" do
+      it "raises ArgumentError" do
+        expect do
+          objects.delete(id_or_slug: "  ")
+        end.to raise_error(ArgumentError, "Object ID or slug is required")
+      end
+    end
+  end
+
+  describe "#destroy" do
+    let(:id_or_slug) { "projects" }
+
+    it "is an alias for delete" do
+      expect(objects.method(:destroy)).to eq(objects.method(:delete))
+    end
+
+    it "raises NotImplementedError like delete" do
+      expect do
+        objects.destroy(id_or_slug: id_or_slug)
+      end.to raise_error(NotImplementedError, /Attio API does not currently support/)
+    end
+  end
 end
