@@ -8,10 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.4.0] - 2025-01-12
 
 ### Breaking Changes
-- **Removed fake Meta API**: The Meta resource was completely fabricated and has been removed
 - **Webhook Headers**: Fixed header names (removed X- prefix) - now uses `Attio-Signature` and `Attio-Timestamp`
+- **Method Naming**: Renamed `has_permission?` to `permission?` in Meta resource (alias provided for backward compatibility)
 
 ### Added
+- **Meta Resource**: Proper implementation of /v2/self endpoint for token and workspace information
+  - Get token status and permissions with `client.meta.identify`
+  - Check if token is active with `client.meta.active?`
+  - Get workspace details with `client.meta.workspace`
+  - Check permissions with `client.meta.permission?("scope")`
+  - Get token metadata with `client.meta.token_info`
 - **Rate Limiter Integration**: Now actively enforces rate limits and handles 429 responses
 - **Pagination Support**: Added automatic pagination with `list_all` methods
 - **Filtering and Sorting**: Full support for Attio's filter and sort parameters
@@ -22,23 +28,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Observability** framework with support for multiple backends (StatsD, Datadog, Prometheus, OpenTelemetry)
   - **Webhook** processing with signature verification and event handling
   - **Middleware** support for request/response instrumentation
-- **100% Test Coverage**: Comprehensive tests for all functionality (607 tests total)
 - **Background thread error handling** for production stability
 
 ### Improved
-- **Test Quality**: Maintained 98.81% code coverage (1330/1346 lines)
+- **Test Quality**: Achieved 99.85% code coverage (1373/1375 lines) with 638 tests
 - **Error Handling**: Added graceful error messages and proper retry logic
-- **Health Checks**: Now use real API endpoint (`meta/identify`) instead of fake endpoints
+- **Health Checks**: Now use real API endpoint (`/v2/self`) through Meta resource
 - **HTTP Client**: Properly extracts and handles rate limit headers
 - **Documentation**: All features properly tested and documented
+- **RuboCop Compliance**: Fixed all violations, maintaining clean code standards
 
 ### Fixed
 - Webhook signature verification headers (removed X- prefix)
-- Health check endpoint to use real API
+- Health check endpoint to use real API through Meta resource
 - Background thread error handling in EnhancedClient
 - Rate limiter integration - now actually enforces limits
 - Bulk operations validation (max is 1000, not 100)
 - Invalid retry-after header handling
+- RuboCop naming convention violations
 
 ## [0.3.0] - 2025-08-11
 

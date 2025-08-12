@@ -1,10 +1,10 @@
 # Attio Ruby Client
 
 [![Tests](https://github.com/idl3/attio/actions/workflows/tests.yml/badge.svg)](https://github.com/idl3/attio/actions/workflows/tests.yml)
-[![Test Coverage](https://img.shields.io/badge/coverage-98.81%25-brightgreen.svg)](https://github.com/idl3/attio/tree/master/spec)
+[![Test Coverage](https://img.shields.io/badge/coverage-99.85%25-brightgreen.svg)](https://github.com/idl3/attio/tree/master/spec)
 [![Documentation](https://img.shields.io/badge/docs-yard-blue.svg)](https://idl3.github.io/attio)
 [![Gem Version](https://badge.fury.io/rb/attio.svg)](https://badge.fury.io/rb/attio)
-[![RSpec](https://img.shields.io/badge/RSpec-607_tests-green.svg)](https://github.com/idl3/attio/tree/master/spec)
+[![RSpec](https://img.shields.io/badge/RSpec-638_tests-green.svg)](https://github.com/idl3/attio/tree/master/spec)
 
 Ruby client for the [Attio CRM API](https://developers.attio.com/). This library provides easy access to the Attio API, allowing you to manage records, objects, lists, and more.
 
@@ -356,8 +356,34 @@ attribute = client.attributes.create(
 # List workspace users
 users = client.users.list
 
-# Get current user
-user = client.users.me
+# Get a specific user by ID
+user = client.users.get(id: 'user-123')
+```
+
+#### Meta (Token & Workspace Info)
+
+```ruby
+# Get current token and workspace information
+meta = client.meta.identify
+# => { "data" => { "active" => true, "workspace_name" => "My Workspace", ... } }
+
+# Check if token is active
+if client.meta.active?
+  puts "Token is valid and active"
+end
+
+# Get workspace details
+workspace = client.meta.workspace
+# => { "id" => "...", "name" => "My Workspace", "slug" => "my-workspace" }
+
+# Check permissions
+if client.meta.permission?("record_permission:read-write")
+  puts "Can read and write records"
+end
+
+# Get all permissions
+permissions = client.meta.permissions
+# => ["comment:read-write", "list_configuration:read", ...]
 ```
 
 ### Advanced Features
@@ -512,6 +538,11 @@ end
 # Check health of all components
 health = client.health_check
 # => { api: true, pool: true, circuit_breaker: :healthy, rate_limiter: true }
+
+# Verify API connectivity and token validity
+if client.meta.active?
+  puts "API connection healthy, token valid"
+end
 
 # Get statistics
 stats = client.stats
@@ -682,7 +713,8 @@ This client supports all major Attio API endpoints:
 - ✅ **Lists** - List, get entries, manage list entries
 - ✅ **Attributes** - List, create, update custom attributes
 - ✅ **Workspaces** - List, get current workspace
-- ✅ **Users** - List, get current user
+- ✅ **Users** - List, get specific user
+- ✅ **Meta** - Get token info, workspace details, and permissions (/v2/self endpoint)
 
 ### Collaboration Features
 - ✅ **Comments** - CRUD operations, emoji reactions on records and threads
@@ -742,39 +774,10 @@ open coverage/index.html
 ```
 
 Current stats:
-- **Test Coverage**: 100% (1311/1311 lines)
-- **Test Count**: 590 tests
+- **Test Coverage**: 99.85% (1373/1375 lines)
+- **Test Count**: 638 tests
 - **RuboCop**: 0 violations
 
-## Migration from v0.3.0 to v0.4.0
-
-### Breaking Changes
-
-1. **Meta API Removed**: The Meta resource was completely fake and has been removed.
-   ```ruby
-   # OLD (will not work)
-   client.meta.identify
-   
-   # NEW - use a real endpoint if needed
-   # No direct replacement - Meta API didn't exist in Attio
-   ```
-
-2. **Webhook Headers Fixed**: Header names no longer have X- prefix.
-   ```ruby
-   # OLD
-   headers["X-Attio-Signature"]
-   
-   # NEW
-   headers["Attio-Signature"]
-   ```
-
-3. **Records List Method**: Now uses GET instead of POST internally (no API change needed).
-
-### New Features
-
-- **Rate Limiting**: Now automatically enforced
-- **Pagination**: Use `list_all` for automatic pagination
-- **Filtering**: Full support for Attio's filter syntax
 
 ## Contributing
 
