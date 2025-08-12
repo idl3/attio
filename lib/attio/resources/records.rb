@@ -44,9 +44,36 @@ module Attio
       #     filters: { name: { contains: 'John' } },
       #     limit: 50
       #   )
-      def list(object:, **params)
+      def list(object:, filter: nil, sort: nil, limit: nil, offset: nil, **params)
         validate_required_string!(object, "Object type")
-        request(:post, "objects/#{object}/records/query", params)
+
+        # Build query parameters with filtering and sorting support
+        query_params = build_query_params({
+          filter: filter,
+          sort: sort,
+          limit: limit,
+          offset: offset,
+          **params,
+        })
+
+        request(:post, "objects/#{object}/records/query", query_params)
+      end
+
+      # List all records with automatic pagination
+      # @param object [String] The object type to query
+      # @param filter [Hash] Filtering criteria
+      # @param sort [String] Sorting option
+      # @param page_size [Integer] Number of records per page
+      # @return [Enumerator] Enumerator that yields each record
+      def list_all(object:, filter: nil, sort: nil, page_size: 50)
+        validate_required_string!(object, "Object type")
+
+        query_params = build_query_params({
+          filter: filter,
+          sort: sort,
+        })
+
+        paginate("objects/#{object}/records/query", query_params, page_size: page_size)
       end
 
       # Retrieve a specific record by ID.

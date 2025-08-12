@@ -104,6 +104,59 @@ module Attio
       private def handle_delete_request(connection, path, params)
         params.empty? ? connection.delete(path) : connection.delete(path, params)
       end
+
+      # Paginate through all results for a given endpoint
+      # @param path [String] The API endpoint path
+      # @param params [Hash] Query parameters including filters
+      # @param page_size [Integer] Number of items per page (default: 50)
+      # @return [Enumerator] Yields each item from all pages
+      private def paginate(path, params = {}, page_size: 50)
+        Enumerator.new do |yielder|
+          offset = 0
+          loop do
+            page_params = params.merge(limit: page_size, offset: offset)
+            # Use POST for query endpoints, GET for others
+            method = path.end_with?("/query") ? :post : :get
+            response = request(method, path, page_params)
+
+            data = response["data"] || []
+            data.each { |item| yielder << item }
+
+            # Stop if we got fewer items than requested (last page)
+            break if data.size < page_size
+
+            offset += page_size
+          end
+        end
+      end
+
+      # Build query parameters with filtering and sorting support
+      # @param options [Hash] Options including filter, sort, limit, offset
+      # @return [Hash] Formatted query parameters
+      private def build_query_params(options = {})
+        params = {}
+
+        # Add filtering
+        add_filter_param(params, options[:filter]) if options[:filter]
+
+        # Add standard parameters
+        %i[sort limit offset].each do |key|
+          params[key] = options[key] if options[key]
+        end
+
+        # Add any other parameters
+        options.each do |key, value|
+          next if %i[filter sort limit offset].include?(key)
+
+          params[key] = value
+        end
+
+        params
+      end
+
+      private def add_filter_param(params, filter)
+        params[:filter] = filter.is_a?(String) ? filter : filter.to_json
+      end
     end
   end
 end

@@ -13,7 +13,7 @@ RSpec.describe Attio::Resources::Records do
       allow(records).to receive(:request).and_return(response)
     end
 
-    it "makes a POST request to list records" do
+    it "makes a POST request to query records" do
       expect(records).to receive(:request).with(:post, "objects/#{object}/records/query", params)
       records.list(object: object, **params)
     end
