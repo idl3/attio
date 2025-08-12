@@ -124,10 +124,10 @@ RSpec.describe "Rate Limiter Integration" do
         )
       
       # Stub health check endpoint
-      stub_request(:get, "https://api.attio.com/v2/meta/identify")
+      stub_request(:get, "https://api.attio.com/v2/self")
         .to_return(
           status: 200,
-          body: { workspace: { id: "test-workspace" } }.to_json,
+          body: { data: { active: true, workspace_name: "Test Workspace" } }.to_json,
           headers: { "Content-Type" => "application/json" }
         )
     end

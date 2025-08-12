@@ -12,7 +12,7 @@ RSpec.describe Attio::Resources::Workspaces do
     end
 
     it "makes a GET request to get workspace information" do
-      expect(workspaces).to receive(:request).with(:get, "workspace")
+      expect(workspaces).to receive(:request).with(:get, "self")
       workspaces.get
     end
 
@@ -34,7 +34,7 @@ RSpec.describe Attio::Resources::Workspaces do
     end
 
     it "makes a GET request to list workspace members" do
-      expect(workspaces).to receive(:request).with(:get, "workspace/members", params)
+      expect(workspaces).to receive(:request).with(:get, "workspace_members", params)
       workspaces.members(**params)
     end
 
@@ -43,18 +43,18 @@ RSpec.describe Attio::Resources::Workspaces do
     end
 
     it "accepts optional parameters" do
-      expect(workspaces).to receive(:request).with(:get, "workspace/members", params)
+      expect(workspaces).to receive(:request).with(:get, "workspace_members", params)
       workspaces.members(**params)
     end
 
     it "works without parameters" do
-      expect(workspaces).to receive(:request).with(:get, "workspace/members", {})
+      expect(workspaces).to receive(:request).with(:get, "workspace_members", {})
       workspaces.members
     end
 
     it "handles pagination parameters" do
       pagination_params = { limit: 50, offset: 100 }
-      expect(workspaces).to receive(:request).with(:get, "workspace/members", pagination_params)
+      expect(workspaces).to receive(:request).with(:get, "workspace_members", pagination_params)
       workspaces.members(**pagination_params)
     end
   end

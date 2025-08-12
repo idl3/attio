@@ -359,7 +359,7 @@ RSpec.describe Attio::EnhancedClient do
       client = described_class.new(api_key: api_key)
       
       allow(client).to receive(:connection).and_return(connection)
-      allow(connection).to receive(:get).with("meta/identify").and_raise(StandardError)
+      allow(connection).to receive(:get).with("self").and_raise(StandardError)
       
       result = client.send(:check_api_health)
       expect(result).to be false
@@ -369,7 +369,7 @@ RSpec.describe Attio::EnhancedClient do
       client = described_class.new(api_key: api_key)
       
       allow(client).to receive(:connection).and_return(connection)
-      allow(connection).to receive(:get).with("meta/identify").and_return({ "workspace" => { "id" => "test" } })
+      allow(connection).to receive(:get).with("self").and_return({ "data" => { "active" => true } })
       
       result = client.send(:check_api_health)
       expect(result).to be true

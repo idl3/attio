@@ -64,6 +64,15 @@ module Attio
       )
     end
 
+    # Access to the Meta API resource.
+    #
+    # @return [Resources::Meta] Meta resource instance
+    # @example
+    #   info = client.meta.identify
+    def meta
+      @meta ||= Resources::Meta.new(self)
+    end
+
     # Access to the Records API resource.
     #
     # @return [Resources::Records] Records resource instance

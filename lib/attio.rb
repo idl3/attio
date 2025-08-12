@@ -9,6 +9,7 @@ require "attio/client"
 
 # Resources
 require "attio/resources/base"
+require "attio/resources/meta"
 require "attio/resources/records"
 require "attio/resources/objects"
 require "attio/resources/lists"

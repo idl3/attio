@@ -223,7 +223,7 @@ module Attio
     end
 
     private def check_api_health
-      connection.get("meta/identify")
+      connection.get("self")
       true
     rescue StandardError
       false
