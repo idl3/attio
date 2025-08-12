@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.5.0] - 2025-01-12
 
 ### Added
 - **Custom Objects Support**: Create and update operations for custom objects
@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Delete method raises `NotImplementedError` with helpful message directing to Attio UI
   - Proper validation and error handling for all operations
   - Comprehensive test coverage with 28 new test cases
+
+### Improved
+- Test coverage maintained at 99.86% (1392/1394 lines)
+- Total test count increased to 658 tests
 
 ### Notes
 - Delete operation for custom objects is not supported by the Attio API v2.0.0
