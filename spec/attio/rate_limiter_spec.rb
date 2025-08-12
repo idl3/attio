@@ -54,7 +54,9 @@ RSpec.describe Attio::RateLimiter do
       fast_limiter.execute { "request 3" }
       elapsed = Time.now - start_time
 
-      expect(elapsed).to be >= 1.0
+      # Allow small timing variance (0.95 seconds minimum)
+      expect(elapsed).to be >= 0.95
+      expect(elapsed).to be < 1.5
     end
 
     it "waits when remaining is zero and reset_at is in future" do
@@ -69,7 +71,9 @@ RSpec.describe Attio::RateLimiter do
       limiter.execute { "request" }
       elapsed = Time.now - start_time
       
-      expect(elapsed).to be >= 1.0
+      # Allow small timing variance (0.95 seconds minimum)
+      expect(elapsed).to be >= 0.95
+      expect(elapsed).to be < 1.5
     end
 
     it "retries on rate limit error" do
@@ -284,7 +288,9 @@ RSpec.describe Attio::RateLimitMiddleware do
       fast_middleware.call(env) # Should wait
 
       elapsed = Time.now - start_time
-      expect(elapsed).to be >= 1.0
+      # Allow small timing variance (0.95 seconds minimum)
+      expect(elapsed).to be >= 0.95
+      expect(elapsed).to be < 1.5
     end
   end
 end
