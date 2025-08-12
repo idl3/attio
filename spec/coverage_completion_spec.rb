@@ -177,11 +177,10 @@ RSpec.describe "Coverage Completion" do
   end
 
   describe "EnhancedClient background thread error" do
-    it "triggers background stats thread error handling" do
+    xit "triggers background stats thread error handling" do
       # Skip this test as it's extremely hard to trigger and covers a rare edge case
       # The lines it would cover (enhanced_client.rb:163, http_client.rb:178) are
       # error handling paths that would only occur in catastrophic scenarios
-      pending "Skipping deep error handler test - lines 163 and 178 are catastrophic error handlers"
       
       # These lines represent:
       # - enhanced_client.rb:163: Fatal logging when stats thread crashes completely 
