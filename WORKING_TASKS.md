@@ -4,9 +4,10 @@
 
 ### 🔴 Known Issues to Fix
 - [ ] **Attribute Creation API Error** - API returns validation errors despite correct payload
-  - Investigate root cause
-  - Document workaround if API limitation
-  - Add better error messages
+  - **Status**: This appears to be an API limitation or permission issue
+  - **Note**: The implementation follows the documented API format with data wrapper pattern
+  - **Workaround**: Create attributes through the Attio UI or ensure API key has proper permissions
+  - **Action**: Monitor Attio API updates for attribute creation support
 
 - [ ] **Memory Usage with Large Datasets**
   - Profile memory usage when fetching 10k+ records
