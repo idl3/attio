@@ -1,5 +1,6 @@
 # Attio Ruby Client
 
+[![Development Status](https://img.shields.io/badge/status-beta-yellow.svg)](https://github.com/idl3/attio)
 [![Tests](https://github.com/idl3/attio/actions/workflows/tests.yml/badge.svg)](https://github.com/idl3/attio/actions/workflows/tests.yml)
 [![Test Coverage](https://img.shields.io/badge/coverage-99.86%25-brightgreen.svg)](https://github.com/idl3/attio/tree/master/spec)
 [![Documentation](https://img.shields.io/badge/docs-yard-blue.svg)](https://idl3.github.io/attio)
@@ -7,6 +8,21 @@
 [![RSpec](https://img.shields.io/badge/RSpec-768_tests-green.svg)](https://github.com/idl3/attio/tree/master/spec)
 
 Ruby client for the [Attio CRM API](https://developers.attio.com/). This library provides easy access to the Attio API, allowing you to manage records, objects, lists, and more.
+
+## ⚠️ Development Status Warning
+
+**This gem is in active development and is NOT recommended for production use until version 1.0.0 is released.**
+
+- **Current Version**: 0.5.0 (Beta)
+- **Stability**: API may change between minor versions
+- **Production Ready**: Expected at v1.0.0
+- **Use at Your Own Risk**: While we have comprehensive tests, this gem is still evolving
+
+If you choose to use this gem before v1.0.0:
+- Pin to a specific version in your Gemfile
+- Review the CHANGELOG carefully before upgrading
+- Test thoroughly in your staging environment
+- Be prepared for potential breaking changes
 
 ## Requirements
 
