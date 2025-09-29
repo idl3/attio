@@ -11,7 +11,7 @@ gem "rake", "~> 13.0"
 group :development, :test do
   gem "pry", "~> 0.14"
   gem "rspec", "~> 3.12"
-  gem "rubocop", "~> 1.50"
+  gem "rubocop", "~> 1.81"
   gem "rubocop-rspec", "~> 2.19"
   gem "simplecov", "~> 0.22"
   gem "simplecov-console", "~> 0.9"
