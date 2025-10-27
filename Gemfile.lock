@@ -21,6 +21,7 @@ GEM
     ethon (0.16.0)
       ffi (>= 1.15.0)
     ffi (1.17.2-arm64-darwin)
+    ffi (1.17.2-x86_64-linux-gnu)
     hashdiff (1.2.0)
     json (2.13.2)
     language_server-protocol (3.17.0.5)
@@ -41,19 +42,19 @@ GEM
     rake (13.3.0)
     regexp_parser (2.11.1)
     rexml (3.4.1)
-    rspec (3.13.1)
+    rspec (3.13.2)
       rspec-core (~> 3.13.0)
       rspec-expectations (~> 3.13.0)
       rspec-mocks (~> 3.13.0)
-    rspec-core (3.13.5)
+    rspec-core (3.13.6)
       rspec-support (~> 3.13.0)
     rspec-expectations (3.13.5)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.13.0)
-    rspec-mocks (3.13.5)
+    rspec-mocks (3.13.6)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.13.0)
-    rspec-support (3.13.4)
+    rspec-support (3.13.6)
     rubocop (1.79.2)
       json (~> 2.3)
       language_server-protocol (~> 3.17.0.2)
@@ -107,13 +108,14 @@ GEM
 
 PLATFORMS
   arm64-darwin-24
+  x86_64-linux
 
 DEPENDENCIES
   attio!
   logger
   pry (~> 0.14)
   rake (~> 13.0)
-  rspec (~> 3.12)
+  rspec (~> 3.13)
   rubocop (~> 1.50)
   rubocop-rspec (~> 2.19)
   simplecov (~> 0.22)
