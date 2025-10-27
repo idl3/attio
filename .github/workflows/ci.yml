@@ -96,7 +96,7 @@ jobs:
         bundle-audit check --update || true
 
     - name: Upload security scan results
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       if: always()
       with:
         name: security-scan-results
@@ -130,7 +130,7 @@ jobs:
         ruby -e "require 'attio'; puts 'Gem loads successfully'"
 
     - name: Upload gem artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v5
       with:
         name: gem-build
         path: attio-*.gem
