@@ -6,11 +6,11 @@ source "https://rubygems.org"
 gemspec
 
 gem "logger" # Required for Ruby 3.5.0+ compatibility
-gem "rake", "~> 13.0"
+gem "rake", "~> 13.3"
 
 group :development, :test do
   gem "pry", "~> 0.14"
-  gem "rspec", "~> 3.12"
+  gem "rspec", "~> 3.13"
   gem "rubocop", "~> 1.50"
   gem "rubocop-rspec", "~> 2.19"
   gem "simplecov", "~> 0.22"
